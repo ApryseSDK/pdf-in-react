@@ -1,8 +1,0 @@
-#timeoverlay{
-    position: fixed;
-    left: 10px;
-    top: 50px;
-    font-size: 1.1em;
-    color: #1e90ff;
-    text-shadow: 1px 1px 1px #FFF, -1px -1px 1px #FFF, 1px -1px 1px #FFF, -1px 1px 1px #FFF;
-}

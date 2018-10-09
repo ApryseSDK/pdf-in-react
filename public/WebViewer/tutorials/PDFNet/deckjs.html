@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+<!--ga-tag-->
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFNetJS</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../../index.html">Overview</a></li>
+                <li><a href="../../whatsnew.html">What's New</a></li>
+                <li><a href="../../documentation.html">Documentation</a></li>
+                <li><a href="../../samples.html">Samples</a></li>
+                <li><a href="../../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Making a Scrolling Display in PDFNetJS</h3>
+                    <p>
+                        With some additional tools, PDFNetJS can create interactive visual displays of PDFs on the browser. This tutorial teaches you how to combine PDFNetJS with <a href="http://imakewebthings.com/deck.js/">Deck.js</a> to produce a sliding display of a PDF document in your browser. You can see this in action using the Webviewer API <a href="https://www.pdftron.com/webviewer/demo/samples/deckjs/index.html">here</a>.
+                        <br>
+                        <br>
+                        For an introduction to some of the concepts that PDFNetJS uses, refer to our <a href="PDFNet/starting-out.html">Getting Started with PDFNetJS</a> tutorial.
+                        <br>
+                    </p>
+                    <h4>Starting From Scratch</h4>
+                    <p>
+                        <ol>
+                            <li>Download the <a href="https://www.pdftron.com/pdfnet/pdfnetjs/" target="_blank">PDFNetJS full</a> and unzip the package to a designated folder.</li>
+                            <li>Create an empty HTML file and place it in the designated folder (file will be referred to as SampleTest.html).</li>
+                            <li>Create an empty JavaScript file and place it in the designated folder (file will be referred to as SampleTest.js).</li>
+                            <li>Place the PDF document that you would like to display into the designated folder.</li>
+                        </ol>
+                            Note: This tutorial uses ES6 JavaScript promises and generators. For more information on promises and generators, refer to these online explanations:
+                            <br>
+                            <li><a href="http://www.html5rocks.com/en/tutorials/es6/promises/">JavaScript Promises: There and back again</a>.</li>
+                            <li><a href="http://davidwalsh.name/async-generators">Going Async with ES6 Generators</a>.</li>
+
+                    </p>
+                    <h4>Setting up your HTML document</h4>
+                    <p>
+                        The following code is used to set up our HTML file:
+                        <div style="height:227px;border:1px solid #ccc; background: #F0F0F0;overflow:auto;">
+                            <pre style="margin: 0">
+                                <code class="xml">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
+  &lt;meta name="viewport" content="width=1024, user-scalable=no"&gt;
+
+  &lt;title&gt;Your PDF Presentation&lt;/title&gt;
+
+  &lt;!-- Required JS files. --&gt;
+  &lt;script src="WebViewer/jquery-3.2.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/samples/deckjs/core/deck.core.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/ControlUtils.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/CoreControls.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/pdf/PDFNet.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/samples/PDFNet/Setup.js"&gt;&lt;/script&gt;
+  &lt;script src="SampleTest.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/samples/deckjs/viewerPDFNet.js"&gt;&lt;/script&gt;
+
+  &lt;!-- Required stylesheet --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/core/deck.core.css"&gt; &lt;!-- contains core .css features for display --&gt;
+
+  &lt;!-- Extension CSS files go here. Remove or add as needed. --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/hash/deck.hash.css"&gt; &lt;!-- .css file used for deck.hash.js script --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/navigation/deck.navigation.css"&gt; &lt;!-- .css file used for deck.navigation.js script --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/status/deck.status.css"&gt; &lt;!-- .css file used for deck.status.js script --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/scale/deck.scale.css"&gt; &lt;!-- .css file used for deck.scale.js script --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/goto/deck.goto.css"&gt; &lt;!-- .css file used for deck.goto.js script --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/extensions/menu/deck.menu.css"&gt; &lt;!-- .css file used for deck.menu.js script --&gt;
+
+  &lt;!-- Style theme. More available in /themes/style/ or create your own. --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/themes/style/web-2.0.css"&gt; &lt;!-- Adds the pale blue background --&gt;
+
+  &lt;!-- Transition theme. More available in /themes/transition/ or create your own. --&gt;
+  &lt;link rel="stylesheet" href="WebViewer/samples/deckjs/themes/transition/horizontal-slide.css"&gt; &lt;!-- Allows the horizontal scrolling/sliding effect--&gt;
+  &lt;!--&lt;link rel="stylesheet" href="WebViewer/samples/deckjs/custom.css"&gt;--&gt;
+
+  &lt;script src="WebViewer/samples/deckjs/modernizr.custom.js"&gt;&lt;/script&gt;
+
+&lt;/head&gt;
+&lt;body class="deck-container"&gt;
+  &lt;!-- Begin extension snippets. Add or remove as needed. --&gt;
+  &lt;!-- deck.navigation snippet, adds previous and next browser buttons --&gt;
+  &lt;a href="#" class="deck-prev-link" title="Previous"&gt;&#8592;&lt;/a&gt;
+  &lt;a href="#" class="deck-next-link" title="Next"&gt;&#8594;&lt;/a&gt;
+
+  &lt;!-- deck.status snippet / loading--&gt;
+  &lt;p class="deck-status"&gt;
+    &lt;span class="deck-status-current"&gt;&lt;/span&gt;
+    /
+    &lt;span class="deck-status-total"&gt;&lt;/span&gt;
+  &lt;/p&gt;
+
+  &lt;!-- Creates Goto bar snippet that can be opened with "G" --&gt;
+  &lt;form action="." method="get" class="goto-form"&gt;
+    &lt;label for="goto-slide"&gt;Go to slide:&lt;/label&gt;
+    &lt;input type="text" name="slidenum" id="goto-slide" list="goto-datalist"&gt;
+    &lt;datalist id="goto-datalist"&gt;&lt;/datalist&gt;
+    &lt;input type="submit" value="Go"&gt;
+  &lt;/form&gt;
+
+  &lt;!-- deck.hash snippet --&gt;
+  &lt;a href="." title="Permalink to this slide" class="deck-permalink"&gt;#&lt;/a&gt;
+
+  &lt;!-- Extension JS files. Add or remove as needed. --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/hash/deck.hash.js"&gt;&lt;/script&gt; &lt;!-- enables internal links to slides and updates address bar with hash --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/navigation/deck.navigation.js"&gt;&lt;/script&gt; &lt;!-- allows page navigation with the in-browser buttons --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/status/deck.status.js"&gt;&lt;/script&gt; &lt;!-- outputs a (current)/(total) page number status --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/scale/deck.scale.js"&gt;&lt;/script&gt; &lt;!-- scales pdf document to fit the browser window --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/goto/deck.goto.js"&gt;&lt;/script&gt;  &lt;!-- Adds a form for jumpiung to any slide number, press "G" to use --&gt;
+  &lt;script src="WebViewer/samples/deckjs/extensions/menu/deck.menu.js"&gt;&lt;/script&gt; &lt;!-- creates url #indicator of your current page, press "M" to use --&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+                                </code>
+                            </pre>
+                        </div>
+                    </p>
+                    <p>
+                        Important scripts of note:
+                        <li>"WebViewer/samples/deckjs/core/deck.core.js" - adds the deckjs library.</li>
+                        <li>"WebViewer/samples/deckjs/viewerPDFNet.js" - adds a custom script used to integrate PDFNetjs with Deckjs.</li>
+                    </p>
+                    <h4>Setting up your JavaScript Document</h4>
+                    <p>
+                        The following code is used to set up our SampleTest.js JavaScript file.
+                        <div style="height:227px;border:1px solid #ccc; background: #F0F0F0;overflow:auto;">
+                            <pre style="margin: 0">
+                                <code class="javascript">
+(function(exports) {
+  "use strict";
+
+  // the path to where the PDF worker files are
+  exports.CoreControls.setWorkerPath('WebViewer/lib/html5');
+
+  function* initAll(docurl) {
+    try {
+      yield exports.PDFNet.initialize(); // yields promise
+      PDFNet.beginOperation();
+      var doc = yield exports.PDFNet.PDFDoc.createFromURL(docurl);
+      doc.initSecurityHandler();
+      doc.lock();
+      var pagecount = yield doc.getPageCount();
+      var pdfdraw = yield exports.PDFNet.PDFDraw.create(100);
+      return {
+        doc: doc,
+        pdfdraw: pdfdraw,
+        pagecount: pagecount
+      };
+    } catch (err) {
+      console.log(err.stack);
+    }
+  }
+
+  exports.loadDocument = function(docurl) {
+    var capability = createPromiseCapability();
+
+    function continueIteration(asyncVal) { // asyncVal is result of yielded promise, sometimes undefined
+      var result = iterator.next(asyncVal) // goes back to the yield, passes it back in canse we store, goes to next yield.
+      if (!result.done) { // return
+        var promise = result.value;
+        promise.then(continueIteration); // repeat.
+      } else {
+        // once it's finished...
+        if (result.value) {
+          capability.resolve(result.value);
+        } else {
+          capability.reject();
+        }
+      }
+    }
+    var iterator = initAll(docurl); // create generator obj
+    iterator.next().value.then(continueIteration);
+    return capability.promise;
+  };
+
+  function* renderPage(renderData, pageIndex) {
+    try {
+      var doc = renderData.doc;
+      var pdfdraw = renderData.pdfdraw;
+
+      var currentPage = yield doc.getPage(pageIndex);
+      var bitmapInfo = yield pdfdraw.getBitmap(currentPage, exports.PDFNet.PDFDraw.PixelFormat.e_rgba, false);
+      var bitmapWidth = bitmapInfo.width;
+      var bitmapHeight = bitmapInfo.height;
+      var bitmapArray = new Uint8ClampedArray(bitmapInfo.buf);
+
+      var drawingCanvas = document.createElement('canvas');
+      drawingCanvas.width = bitmapWidth;
+      drawingCanvas.height = bitmapHeight;
+
+      var ctx = drawingCanvas.getContext('2d');
+      var imgData = ctx.createImageData(bitmapWidth, bitmapHeight);
+      imgData.data.set(bitmapArray);
+
+      ctx.putImageData(imgData, 0, 0);
+      return drawingCanvas;
+
+    } catch(err) {
+      console.log(err.stack);
+
+    } finally {
+
+    }
+  }
+
+  exports.loadCanvasAsync = function(renderData, pageIndex) {
+    var capability = createPromiseCapability();
+    function continueIteration(asyncVal) {
+      var result = iterator.next(asyncVal);
+      if (!result.done) {
+        var promise = result.value;
+        promise.then(continueIteration);
+      } else {
+        // once it's finished...
+        if(result.value) {
+          capability.resolve(result.value);
+        } else {
+          capability.reject();
+        }
+      }
+    }
+    var iterator = renderPage(renderData, pageIndex);
+    iterator.next().value.then(continueIteration);
+    return capability.promise;
+  };
+})(window);
+                                </code>
+                            </pre>
+                        </div>
+                        <br>
+                        SampleTest.js contains four functions:
+                        <br>
+                        <li><font face="Consolas">initAll(docurl)</font></li>
+                        <li><font face="Consolas">exports.loadDocument(docurl)</font></li>
+                        <li><font face="Consolas">renderPage(renderData, pageIndex)</font></li>
+                        <li><font face="Consolas">exports.loadCanvasAsync(renderData, pageIndex)</font></li>
+                        <br>
+                        <u>Initializing PDFNetJS</u>:
+                        <br>
+                        The <font face="Consolas">initAll()</font> function carries out a number of tasks required to initialize PDFNetJS. Here we carry out all our basic tasks of initializing a worker, creating a PDF document object and locking the document (for both PNaCl and Emscripten backends).
+                        <br>
+                        <pre>
+                            <code class="javascript">
+yield exports.PDFNet.initialize();
+PDFNet.beginOperation();
+var doc = yield exports.PDFNet.PDFDoc.createFromURL(docurl);
+doc.initSecurityHandler();
+doc.lock();
+                            </code>
+                        </pre>
+                        In addition to these basic steps required for all scripts using PDFNetJS, for this tutorial we also need to get the total number of pages in the document and a PDFDraw object. The PDFDraw object will allow the user to manipulate a PDF page as if it were an image and for this tutorial we have set the PDFDraw object's DPI to 100.
+                        <pre>
+                            <code class="javascript">
+var pagecount = yield doc.getPageCount();
+var pdfdraw = yield exports.PDFNet.PDFDraw.create(100);
+                            </code>
+                        </pre>
+                        We return the newly created document, the PDFDraw object, and the total page count as a single object that will be used by other functions such as <font face="Consolas">renderPage()</font>.
+                        <pre>
+                            <code class="javascript">
+return {doc: doc, pdfdraw: pdfdraw, pagecount: pagecount};
+                            </code>
+                        </pre>
+                        <u>Handling <font face="Consolas">initAll()</font>'s Asynchronicity</u>:
+                        <br>
+                        The <font face="Consolas">exports.loadDocument()</font> function contains boilerplate to run the <font face="Consolas">initAll()</font> generator and is what allows <font face="Consolas">initAll()</font> to have a synchronous appearance despite being asynchronous. <font face="Consolas">exports.loadDocument()</font> iterates through every asynchronous call in <font face="Consolas">initAll()</font> and either resolves or rejects the return value of <font face="Consolas">initAll()</font> once it has finished running.
+                        <br>
+
+                        <br>
+                        <u>Rendering PDF Pages</u>:
+                        <br>
+                        The <font face="Consolas">renderPage(renderData, pageIndex)</font> function creates and returns a canvas containing information for one PDF page. It takes in two parameters, a renderData object which is the same object that <font face="Consolas">initAll()</font> returns, and a pageIndex variable representing the page number of the current page we want to render.
+                        <br>
+                        <br>
+                        We first retrieve our document and PDFDraw object from renderData. renderData also contains the total number of pages, but this piece of information will not be used in this function.
+                        <pre>
+                            <code class="javascript">
+var doc = renderData.doc;
+var pdfdraw = renderData.pdfdraw;
+                            </code>
+                        </pre>
+                        From the document object we extract the page we want to render, and using the PDFDraw object we draw that page. This will create a buffer containing the rendered image data. We then extract the buffer, width and height of the image. A Uint8ClampedArray view into the buffer is created since the data will soon be copied into an ImageData object (which uses an another Uint8ClampedArray object).
+                        <pre>
+                            <code class="javascript">
+var currentPage = yield doc.getPage(pageIndex);
+var bitmapInfo = yield pdfdraw.getBitmap(currentPage, exports.PDFNet.PDFDraw.PixelFormat.e_rgba, false);
+var bitmapWidth = bitmapInfo.width;
+var bitmapHeight = bitmapInfo.height;
+var bitmapArray = new Uint8ClampedArray(bitmapInfo.buf);
+                            </code>
+                        </pre>
+
+                        Now that we have the bitmap dimensions of our page, we create a Canvas object of the same size.
+                        <pre>
+                            <code class="javascript">
+var drawingCanvas = document.createElement('canvas');
+drawingCanvas.width = bitmapWidth;
+drawingCanvas.height = bitmapHeight;
+                            </code>
+                        </pre>
+                        To insert our bitmap buffer into the canvas, we need to get the canvas' context and use it to create a blank ImageData object with the same dimensions as our bitmap buffer. We then fill in the ImageData object with the Uint8ClampedArray bitmap buffer.
+                        <pre>
+                            <code class="javascript">
+var ctx = drawingCanvas.getContext('2d');
+var imgData = ctx.createImageData(bitmapWidth, bitmapHeight);
+imgData.data.set(bitmapArray);
+                            </code>
+                        </pre>
+
+                        Finally, we insert our ImageData object into our canvas' context and we return our canvas which now contains the PDF page.
+                        <pre>
+                            <code class="javascript">
+ctx.putImageData(imgData, 0, 0); // replace pixel data of canvas
+return drawingCanvas;
+                            </code>
+                        </pre>
+                        <u>Handling renderPage()'s Asynchronicity:</u>
+                        <br>
+                        Similar to the <font face="Consolas">exports.loadDocument()</font> function, <font face="Consolas">exports.loadCanvasAsync()</font> contains boilerplate to handle the asynchronous function calls in <font face="Consolas">renderPage()</font> allowing <font face="Consolas">renderPage()</font> to have a synchronous appearance.
+                        <h4>Understanding viewerPDFNetJS</h4>
+                        viewerPDFNet.js is a JavaScript file located in the "Webviewer/samples/deckjs" folder that contains custom code used to integrate deck.js and PDFNetJS to run this particular tutorial. For ease of accessibilty, a copy of the code has been added here.
+                        <br>
+                        <br>
+                        <div style="height:227px;border:1px solid #ccc; background: #F0F0F0;overflow:auto;">
+                            <pre style="margin: 0">
+                                <code class="javascript">
+// Code inside viewerPDFNet.js
+$(function() {
+  var $document = $(document);
+  // The total number of pages in the document
+  var pageCount = 0;
+  // The loading status of every page
+  var status = {
+    NOT_STARTED: 0,
+    QUEUED: 1,
+    STARTED: 2,
+    FINISHED: 3
+  };
+  // used to keep track of whether we have loaded the page or not
+  var pageStatus = [];
+  // used to ensure that all commands will be run in order without conflicts
+  var renderQueue = [];
+
+  var queryParams = window.ControlUtils.getQueryStringMap();
+  // get the document location from the query string (eg ?d=/files/myfile.xod)
+  var docLocation = queryParams.getString('d');
+
+  if (docLocation === null) {
+    return;
+  }
+
+  var renderData;
+  window.loadDocument(docLocation).then(function(renderInfo){
+    renderData = renderInfo;
+    $document.trigger('documentLoaded');
+  });
+
+  $document.on('documentLoaded', function() {
+    pageCount = renderData.pagecount;
+    for (var i = 0; i &lt; pageCount; i++) {
+      addSlide(i);
+      pageStatus.push(status.NOT_STARTED);
+    }
+
+    // initially load the first five pages
+    for (var i = 0; i &lt; Math.min(pageCount, 5); i++) {
+      loadCanvas(i);
+    }
+
+    // initialize the deck
+    $.deck('.slide');
+  });
+
+  $document.on('deck.change', function(event, from, to) {
+    // load the previous, current and next pages on a page change
+    // note that if they are already loaded they won't be loaded again
+    loadCanvas(to - 1);
+    loadCanvas(to);
+    loadCanvas(to + 1);
+  });
+
+  function addSlide(pageIndex) {
+    var slide = $('&lt;section&gt;').attr('id', 'page' + pageIndex).addClass('slide');
+    slide.append($('&lt;div class="loading"&gt;'));
+    $('body').append(slide);
+  }
+
+  function loadCanvas(pageIndex) {
+    if (pageIndex &lt; 0 || pageIndex &gt;= pageCount) {
+      return;
+    }
+
+    var renderNextPage = function() {
+      var pageIndex = renderQueue[0];
+      pageStatus[pageIndex] = status.STARTED;
+
+      window.loadCanvasAsync(renderData, pageIndex+1).then(function(canvas){
+        pageStatus[pageIndex] = status.FINISHED;
+        var $canvas = $(canvas);
+        $canvas.addClass('canvasPage');
+
+        var pageContainer = $('#page' + pageIndex);
+        pageContainer.append($canvas);
+        pageContainer.find('.loading').remove();
+
+        // trigger page rescale
+        $.deck('enableScale');
+
+        // make sure page is centered for very large page sizes by using a negative margin
+        var widthDiff = parseFloat($canvas.css('width')) - pageContainer.find('.deck-slide-scaler').width();
+        $canvas.css('margin-left', (-widthDiff / 2) + 'px');
+        if(renderQueue.length &gt; 1) {
+          setTimeout(function(){
+            renderQueue.shift();
+            renderNextPage();
+          }, 0);
+        } else {
+          renderQueue.shift();
+        }
+      });
+    }
+
+    if (pageStatus[pageIndex] === status.NOT_STARTED) {
+      renderQueue.push(pageIndex);
+      pageStatus[pageIndex] = status.QUEUED;
+      if(renderQueue.length === 1) {
+        renderNextPage();
+      }
+    }
+  }
+});
+                                </code>
+                            </pre>
+                        </div>
+                        <br>
+                        <u>Initializing the Sample</u>
+                        <br>
+                        To start up our sample, we first call our <font face="Consolas">loadDocument()</font> function described earlier in SampleTest.js
+                        <br>
+                        (note: window.loadDocument is equivalent to exports.loadDocument).
+                        <br>
+                        This returns to us an object containing the document, the PDFDraw object, and the number of pages that the document has and we then store this object into renderData.
+                        <pre>
+                            <code class="javascript">
+var renderData;
+window.loadDocument(docLocation).then(function(renderInfo){
+  renderData = renderInfo;
+  $document.trigger('documentLoaded');
+});
+                            </code>
+                        </pre>
+                        Once everything is initialized and the return value stored, we set the document status to "documentLoaded", which triggers our sample to begin setting up the deck.
+                        <br>
+                        <br>
+                        For every page in the PDF document, we add a new empty slide to our browser and give it the status "NOT_STARTED". To start off, we also begin rendering the first 5 pages using <font face="Consolas">loadCanvas()</font>.
+                        <br>
+                        <pre>
+                            <code class="javascript">
+$document.on('documentLoaded', function() {
+  pageCount = renderData.pagecount;
+  for (var i = 0; i &lt; pageCount; i++) {
+    addSlide(i);
+    pageStatus.push(status.NOT_STARTED);
+  }
+  for (var i = 0; i &lt; Math.min(pageCount, 5); i++) {
+    loadCanvas(i);
+  }
+  $.deck('.slide'); // initializes the deck
+});
+                            </code>
+                        </pre>
+
+                        <u>Running loadCanvas()</u>
+                        <br>
+                        <font face="Consolas">loadCanvas()</font> checks and queues up all commands to load a new canvas before rendering each page in order.
+                        <br>
+                        <br>
+                        <div style="height:227px;border:1px solid #ccc; background: #F0F0F0;overflow:auto;">
+                            <pre style="margin: 0">
+                                <code class="javascript">
+function loadCanvas(pageIndex) {
+  // Check if valid page
+  if (pageIndex &lt; 0 || pageIndex &gt;= pageCount) {
+    return;
+  }
+
+  var renderNextPage = function(){
+    var pageIndex = renderQueue[0];
+    pageStatus[pageIndex] = status.STARTED;
+
+    window.loadCanvasAsync(renderData, pageIndex+1).then(function(canvas){
+      pageStatus[pageIndex] = status.FINISHED;
+      var $canvas = $(canvas);
+      $canvas.addClass('canvasPage');
+
+      var pageContainer = $('#page' + pageIndex);
+      pageContainer.append($canvas);
+      pageContainer.find('.loading').remove();
+
+      // trigger page rescale
+      $.deck('enableScale');
+
+      // make sure page is centered for very large page sizes by using a negative margin
+      var widthDiff = parseFloat($canvas.css('width')) - pageContainer.find('.deck-slide-scaler').width();
+      $canvas.css('margin-left', (-widthDiff / 2) + 'px');
+      if(renderQueue.length &gt; 1) {
+        setTimeout(function(){
+          renderQueue.shift();
+          renderNextPage();
+        }, 0);
+      } else {
+        renderQueue.shift();
+      }
+    });
+  }
+
+  if (pageStatus[pageIndex] === status.NOT_STARTED) {
+    renderQueue.push(pageIndex);
+    pageStatus[pageIndex] = status.QUEUED;
+    if(renderQueue.length === 1) {
+      renderNextPage();
+    }
+  }
+}
+                                </code>
+                            </pre>
+                        </div>
+                        <br>
+                        in <font face="Consolas">loadCanvas()</font>, we use a queue named <font face="Consolas">renderQueue</font> to keep track of the order that each page should be rendered in. Since createFromBuffer calls are asynchronous and we are only using a single PDFDraw object, there is the possibility that the PDFDraw object used for one command may be affected halfway through the process by a different command. To avoid potential conflicts between commands, we store page numbers representing not-yet-rendered pages in the RenderQueue array and execute each one in order by calling <font face="Consolas">renderNextPage()</font>.
+                        <pre>
+                            <code class="javascript">
+if (pageStatus[pageIndex] === status.NOT_STARTED) {
+  renderQueue.push(pageIndex);
+  pageStatus[pageIndex] = status.QUEUED;
+  if (renderQueue.length === 1) {
+    renderNextPage();
+  }
+}
+                            </code>
+                        </pre>
+                        <font face="Consolas">renderNextPage()</font> is where we process a given page by getting its number from renderQueue, setting its status to "STARTED", and finally running loadCanvasAsync() on the page.
+                        <pre>
+                            <code class="javascript">
+var renderNextPage = function() {
+  var pageIndex = renderQueue[0];
+  pageStatus[pageIndex] = status.STARTED;
+  window.loadCanvasAsync(renderData, pageIndex+1).then(function(canvas) {
+    ...
+  }
+}
+                            </code>
+                        </pre>
+                        <font face="Consolas">pageContainer</font> represents the current page slide where we append our canvas so that it can be displayed. All slides were initially given a "loading" div that is removed once the canvas is appended.
+                        <br>
+                        <pre>
+                            <code class="javascript">
+var pageContainer = $('#page' + pageIndex);
+pageContainer.append($canvas);
+pageContainer.find('.loading').remove();
+                            </code>
+                        </pre>
+                        Finally, we continue processing the remaining pages in renderQueue.
+                        <pre>
+                            <code class="javascript">
+if(renderQueue.length > 1) {
+  setTimeout(function() {
+    renderQueue.shift();
+    renderNextPage();
+  }, 0);
+} else {
+  renderQueue.shift();
+}
+                            </code>
+                        </pre>
+                        To see the browser-based sliding display of your PDF document, open up SampleTest.html in your web server and at the end of the address add "#d=YOURPDFNAME.pdf".
+                        <br>
+                        (eg. abc/123/SampleTest.html#d=newsletter.pdf)
+                        <br>
+                        <br>
+                    </p>
+
+                    <p>
+                        Questions? Try searching or asking in the <a href="https://groups.google.com/forum/#!forum/pdfnet-webviewer">WebViewer forum</a>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

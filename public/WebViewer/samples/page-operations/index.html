@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            width:100%;
+            height:100%;
+            margin:0px;
+            padding:0px;
+            overflow:hidden;
+        }
+
+        #viewer {
+            height: calc(100% - 30px);
+            overflow: hidden;
+        }
+
+        #header {
+            height: 30px;
+            width: 100%;
+        }
+
+        #header * {
+            margin-left: 10px;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        input {
+            height: 16px;
+        }
+    </style>
+    <script src="../../lib/html5/external/FileSaver.min.js"></script>
+    <script src="../../jquery-3.2.1.min.js"></script>
+    <script src="../../lib/WebViewer.min.js"></script>
+    <script src="../../samples-key.js"></script>
+    <script>
+
+    $(function() {
+      var viewerElement = document.getElementById('viewer');
+      var myWebViewer = new PDFTron.WebViewer({
+        type: 'html5',
+        path: '../../lib',
+        l: window.sampleL, // replace with your own license key and remove the samples-key.js script tag
+        initialDoc: '../../doc/WebViewer_Developer_Guide.pdf',
+        documentId: 'webviewer_developer_guide',
+        showLocalFilePicker: true,
+        mobileRedirect: false,
+        useDownloader: false // currently adding/moving/removing pages is not supported with downloader on
+      }, viewerElement);
+
+      var getDocument = function() {
+        return myWebViewer.getInstance().docViewer.getDocument();
+      };
+
+      var getCoreControls = function() {
+        return viewerElement.querySelector('iframe').contentWindow.CoreControls;
+      };
+
+      $(viewerElement).on('ready', function() {
+        $('#removePages').on('click', function() {
+          getDocument().removePages([2, 3]).then(function() {
+            alert('pages 2 and 3 were removed');
+          });
+        });
+
+        $('#movePage').on('click', function() {
+          getDocument().movePages([5], 1).then(function() {
+            alert('page 5 was moved to page 1');
+          });
+        });
+
+        $('#rotatePages').on('click', function() {
+          getDocument().rotatePages([1, 2], 3).then(function() {
+            alert('pages 1 and 2 were rotated');
+          });
+        });
+
+        $('#insertPages').on('click', function() {
+          var CoreControls = getCoreControls();
+          var newDoc = new CoreControls.Document('korea.pdf', 'pdf');
+
+          CoreControls.getDefaultBackendType().then(function(backendType) {
+            var options = {
+              workerTransportPromise: CoreControls.initPDFWorkerTransports(backendType, {}/* , license key here */)
+            };
+            var partRetriever = new CoreControls.PartRetrievers.ExternalPdfPartRetriever('../../samples/files/korea.pdf');
+            newDoc.loadAsync(partRetriever, function() {
+              var pagesToInsert = [1, 2];
+              var locationToInsert = 3;
+              getDocument().insertPages(newDoc, pagesToInsert, locationToInsert).then(function() {
+                alert('inserted pages from another file');
+              });
+            }, options);
+          });
+        });
+
+        $('#insertBlankPages').on('click', function() {
+          var pageSize = getDocument().getPageInfo(0);
+
+          getDocument().insertBlankPages([2, 2], pageSize.width, pageSize.height).then(function() {
+            alert('two blank pages were inserted after the first page');
+          });
+        });
+
+        $('#cropPage').on('click', function() {
+          getDocument().cropPages([1], 100, 100, 100, 100).then(function() {
+            alert('cropped the first page');
+          });
+        });
+
+        $('#extractPages').on('click', function() {
+          var readerControl = myWebViewer.getInstance();
+          var pageNum = readerControl.docViewer.getCurrentPage();
+          getDocument().extractPages([pageNum], readerControl.docViewer.getAnnotationManager().exportAnnotations()).then(function(arr) {
+            alert('Extracted the current page');
+            var blob = new Blob([arr], {
+              type: 'application/pdf'
+            });
+            saveAs(blob, readerControl.getDownloadFilename(readerControl.filename, '') + '_page' + pageNum + '_extracted.pdf');
+          });
+        });
+
+        $('#downloadFile').on('click', function() {
+          myWebViewer.getInstance().downloadFile({ downloadType: 'pdf' });
+        });
+      });
+    });
+    </script>
+
+</head>
+
+<body>
+    <div id="header">
+        <button id="removePages">Remove pages</button>
+        <button id="movePage">Move page</button>
+        <button id="rotatePages">Rotate pages</button>
+        <button id="insertPages">Insert pages from other document</button>
+        <button id="insertBlankPages">Insert blank pages</button>
+        <button id="cropPage">Crop page</button>
+		<button id="extractPages">Extract Page</button>
+        <button id="downloadFile">Download File</button>
+    </div>
+    <div id="viewer"></div>
+</body>
+</html>

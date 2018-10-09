@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Please Note!</h3>
+                    <p>
+                        We <b>only</b> recommend using XDomain if you need to use CORS and also support IE9. If you don't need to support IE9 then we recommend that you enable CORS on your server in the standard way.
+                        <br/>
+                        <br/>
+                        See here for how to enable CORS without XDomain <a href="https://enable-cors.org/server.html">https://enable-cors.org/server.html</a>.
+                        <br/>
+                        <br/>
+                        If you need to support IE9 or you're really really sure that you need to use XDomain for another reason then continue on through this tutorial.
+                    </p>
+
+                    <h3>Setting up WebViewer for CORS with XDomain</h3>
+
+                    <p>
+                        This tutorial takes you through the steps of setting up CORS with WebViewer through the <a href="https://github.com/jpillora/xdomain">xdomain library</a>.
+                        It is assumed that you have already set up a WebViewer project and have your documents hosted on another domain which you control.
+                        <br/>
+                        Requirements: two HTTP servers
+                    </p>
+
+                    <ol>
+                        <li>
+                            Find xdomain.js in the WebViewer download under lib/html5/external/.  Copy this file to the server where your documents are hosted.
+                            <br/>
+                            <b>Note:</b> Make sure to use this file instead of the one on the xdomain.js GitHub page as there have been modifications done to work with WebViewer.
+                        </li>
+                        <li>
+                            Create an html file called proxy.html.  An example file is included under tutorials/xdomain-files.  The contents should look something like this:
+                            <pre>
+                                <code class="xml">
+&lt;!DOCTYPE HTML&gt;
+&lt;script src=&quot;xdomain.js&quot; master=&quot;http://www.mywebviewerserver.com&quot;&gt;&lt;/script&gt;
+                                </code>
+                            </pre>
+
+                            The src should point to the xdomain.js file you just uploaded and master should be set to the server where your viewer is located.
+                            <br/>
+                            This script sends the actual requests for the document so that they come from the same domain.
+                        </li>
+                        <li>
+                            Back in your viewer code, find the place where you call new PDFTron.WebViewer({...}).  Add the option xdomainProxyUrl to the constructor so that it looks something like this:
+                            <pre>
+                                <code class="javascript">
+new PDFTron.WebViewer({
+  xdomainProxyUrl: &quot;http://mydocumentserver.com/proxy.html&quot;,
+  initialDoc: &quot;http://mydocumentserver.com/myxod.xod&quot;,
+  ...
+  ...
+}, viewerElement);
+                                </code>
+                            </pre>
+                            The value of the property should be the URL of the proxy.html file you added previously.
+                        </li>
+                        <li>
+                            If all of this has been done correctly WebViewer should now be able to load and view documents from the other domain!
+                            <br/>
+                            <br/>
+                            xdomain.js also allows multiple proxy URLs to be specified, so alternatively you could pass an object to WebViewer that specifies these URLs.
+                            See the <a href="https://github.com/jpillora/xdomain#xdomainslavesslaves">xdomain documentation</a> for more details.
+                            <pre>
+                                <code class="javascript">
+new PDFTron.WebViewer({
+  xdomainProxyUrl: {
+    &quot;http://mydocumentserver.com&quot;: &quot;/proxy.html&quot;,
+    &quot;http://myotherdocumentserver.com&quot;: &quot;/proxy.html&quot;
+  },
+  ...
+  ...
+}, viewerElement);
+                                </code>
+                            </pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

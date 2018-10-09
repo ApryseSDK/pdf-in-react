@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Understanding WebViewer HTML Structure</h3>
+
+                    <p>
+                      WebViewer can easily be integrated into an existing HTML page by using the PDFTron.WebViewer constructor and linking it to an element on the page (see the <a href="./getting-started.html">getting started</a> tutorial for more details). A basic JavaScript API is available that you can use from your HTML page, but if you want to do more advanced customizations it's important that you understand the HTML structure that WebViewer creates.
+                    </p>
+
+                    <p>
+                      When you pass in "viewerElement" to the WebViewer constructor, WebViewer will create an iframe and place it in inside viewerElement. The iframe will load ReaderControl.html (or MobileReaderControl.html on mobile devices) which starts up the viewer and loads the document that you specified.
+                    </p>
+
+                    <h4>Your HTML Page</h4>
+
+                    <p>
+                      On your HTML page you might have some JavaScript code that looks like this:
+                        <pre>
+                            <code class="javascript">
+var myWebViewer = new PDFTron.WebViewer({
+  initialDoc: &quot;mydoc.xod&quot;
+}, viewerElement);
+                            </code>
+                        </pre>
+
+                        If you want to interact with WebViewer you can call functions on <code>myWebViewer</code> or listen to events on <code>viewerElement</code>.
+                        For example <code>myWebViewer.setCurrentPageNumber(5)</code> or <code>$(viewerElement).on('ready', function() {})</code>.
+                        Documentation for the relevant APIs can be found <a href="../doc/symbols/PDFTron.WebViewer.html">here</a>.
+                    </p>
+
+                    <h4>The WebViewer iframe</h4>
+
+                    <p>
+                      It's important to remember that WebViewer's iframe is a completely separate window, isolated from your own HTML page. Inside this window is where you can directly access the <code>ReaderControl</code>, <code>DocumentViewer</code> and <code>AnnotationManager</code> objects (among others). The easiest way to interact with these objects is to use a <a href="./getting-started-config-files.html">config file</a> which is executed in the context of the iframe window and allows you to access <code>window.readerControl</code> directly.
+                    </p>
+
+                    <p>
+                      So when you call <code>myWebViewer.setCurrentPageNumber(5)</code> on your HTML page, behind the scenes it will be calling a function on DocumentViewer which is inside the iframe window. The functions on myWebViewer and the events on viewerElement are just a convenient subset of the functions and events that can be used directly from the iframe window. They also abstract away the details of interacting with the iframe so you don't have to worry about it.
+                    </p>
+
+                    <p>
+                      If you <b>did</b> want to worry about it, you would need to get a reference to the window object of the iframe. You can do that by calling:
+                        <pre>
+                            <code class="javascript">
+var iframeWindow = viewerElement.querySelector('iframe').contentWindow;
+// equivalent to the code we called before on myWebViewer
+iframeWindow.readerControl.docViewer.setCurrentPage(5);
+                            </code>
+                        </pre>
+
+                        Then anything that you could call in a config file without specifying the window you can also call from your HTML page by prefixing it with <code>iframeWindow</code>.
+                        The PDFTron.WebViewer API also provides the <a href="../doc/symbols/PDFTron.WebViewer.html#getInstance__anchor">getInstance</a> function which is the equivalent of <code>iframeWindow.readerControl</code>. So you could instead call <code>myWebViewer.getInstance().docViewer.setCurrentPage(5);</code>
+                    </p>
+
+                    <p>
+                      Similarly if you want to access the outer page from inside the iframe, e.g. from code in your config file, you can access the parent window using <code>window.parent</code>. So if you defined an API that's loaded on your HTML page, you could access it from inside the iframe like <code>window.parent.myApi.myFunction()</code>.
+                    </p>
+
+                    <p>
+                      <b>Note:</b> If the WebViewer library is on a different domain from your HTML page you can use the window <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> API to communicate between your page and the iframe.
+                    </p>
+
+                    <h4>Troubleshooting</h4>
+
+                    <p>
+                      One gotcha is that if you want to select HTML elements inside the iframe from code on your HTML page you'll need to use jQuery (or the document object) from the iframe. For example:
+                        <pre>
+                            <code class="javascript">
+var iframeWindow = viewerElement.querySelector('iframe').contentWindow;
+var printButton = iframeWindow.$('#printButton');
+// the following won't work because it's not looking at elements inside the iframe
+// var printButton = $('#printButton')
+                            </code>
+                        </pre>
+                    </p>
+
+                    <h4>Summary</h4>
+
+                    <p>
+                      There are a few different ways your code can interact with WebViewer and it helps to understand how WebViewer works behind the scenes so that you can use the ones that work best for your situation.
+                    </p>
+
+                    <p>
+                      Questions? Try searching or asking in the <a href="https://groups.google.com/forum/#!forum/pdfnet-webviewer">WebViewer forum</a>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

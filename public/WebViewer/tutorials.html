@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="assets/style.css" />
+        <style>
+            p {
+                margin-bottom: 2em;
+            }
+            .tutorial {
+                display: -webkit-flex;
+                -webkit-flex-wrap: wrap;
+                -webkit-justify-content: space-between;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            .tutorial div {
+                width: 48%;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header">
+            <ul class="menu" >
+                <li><a href="index.html">Overview</a></li>
+                <li><a href="whatsnew.html">What's New</a></li>
+                <li><a href="documentation.html">Documentation</a></li>
+                <li><a href="samples.html">Samples</a></li>
+                <li><a href="tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2>Tutorials</h2>
+                <div class="project tutorial">
+                    <div>
+                        <h3><a href="tutorials/getting-started.html">Getting Started with WebViewer.js</a></h3>
+                        <p>Introduces you to WebViewer.js and gets you started loading WebViewer.js on a simple page.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/getting-started-converting.html">Getting Started with XOD files</a></h3>
+                        <p>Introduces you to the XOD format and how to get your documents converted to XOD.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/PDFNet/starting-out.html">Getting Started with PDFNetJS</a></h3>
+                        <p>Introduces you to PDFNetJS and gets you started loading PDFNetJS on a simple page.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/PDFNet/viewer.html">Running PDFNetJS with WebViewer</a></h3>
+                        <p>Demonstrates how to use PDFNetJS to read or modify a pdf opened in WebViewer.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/PDFNet/deckjs.html">Running Deck.js with PDFNetJS</a></h3>
+                        <p>Explains how to integrate Deck.js with PDFNetJS to create a fancy sliding display.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/PDFNet/advanced.html">Advanced Features in PDFNetJS</a></h3>
+                        <p>Demonstrates how locking, memory management, and the PNaCl and Emscripten backends work in PDFNetJS.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/streaming-option.html">Using the streaming option</a></h3>
+                        <p>Explains what the streaming option is and how it should be used (or not used).</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/getting-started-annotations.html">Getting Started with Saving/Loading Annotations</a></h3>
+                        <p>Introduces you to the basics of saving and loading annotations on your web server.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/getting-started-config-files.html">HTML5 WebViewer Customizations with Config files</a></h3>
+                        <p>Introduces you to the use of "config files" to perform more specific customizations.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/understanding-html-structure.html">Understanding WebViewer HTML Structure</a></h3>
+                        <p>Explains the relationship between the HTML page you load WebViewer on and the iframe it creates.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/custom-stamps.html">Creating stamp annotations</a></h3>
+                        <p>Explains how to programatically create a stamp annotation.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/customizing-tools.html">Customizing tools</a></h3>
+                        <p>Explains how to override functions on the built in tools.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/custom-annotations.html">Creating custom annotations</a></h3>
+                        <p>Explains how to create a custom annotation and corresponding tool.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/advanced-loading-annotations.html">Advanced Annotation Loading</a></h3>
+                        <p>Explains how to use the setInternalAnnotationsTransform function for more advanced use cases.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/realtime-collaboration.html">Realtime Collaboration</a></h3>
+                        <p>Walks through how to setup the realtime syncing of annotations using WebViewer. Firebase is used as an example backend.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/optimizing-assets.html">Optimizing WebViewer Assets</a></h3>
+                        <p>Explains how to use gulp to minify and concatenate Webviewer resources for faster load times.</p>
+                    </div>
+                    <div>
+                        <h3><a href="tutorials/xdomain.html">Setting up WebViewer for CORS with xdomain</a></h3>
+                        <p>
+                            Takes you through the steps of setting up CORS with WebViewer through the <a href="https://github.com/jpillora/xdomain">xdomain library</a>.
+                            <br/><br/>
+                            This is useful if you need to support IE9 and the documents that are being viewed are stored on another domain which you control.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+
+        </div>
+    </body>
+</html>
+

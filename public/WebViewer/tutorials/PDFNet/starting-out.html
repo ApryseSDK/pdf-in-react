@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>PDFNetJS Starting Out</title>
+        <link rel="stylesheet" href="../../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+<!--ga-tag-->
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFNetJS</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../../index.html">Overview</a></li>
+                <li><a href="../../whatsnew.html">What's New</a></li>
+                <li><a href="../../documentation.html">Documentation</a></li>
+                <li><a href="../../samples.html">Samples</a></li>
+                <li><a href="../../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Getting Started with using PDFNetJS</h3>
+                    <p>
+                        PDFNetJS provides the power of PDFNet rendering and processing in the browser. This tutorial will demonstrate how to set up a basic PDFNetJS project that outputs the number of pages in a PDF document. PDFNetJS does not require any conversion of documents but can only view PDF documents. Without a license key a demo stamp is applied. PDFNetJS is currently not supported on mobile devices.
+                    </p>
+                    <h4>Step 0: Starting from Scratch</h4>
+                    <ol>
+                        <li>Download <a href="https://www.pdftron.com/pdfnet/pdfnetjs/" target="_blank">PDFNetJS full</a>, unzip the file, and move the folder "WebViewer" to a desired location within a web server folder. If you do not have a server available, you can quickly set one up with <a href="https://www.apachefriends.org/index.html">XAMPP</a> or <a href="http://www.wampserver.com/en/">WAMP</a></li>
+                        <li>Create an empty HTML file and place it in the same location as the WebViewer folder (file will be referred to as SampleTest.html).</li>
+                        <li>Create an empty JavaScript file and place it in the same location as the WebViewer folder (file will be referred to as SampleTest.js).</li>
+                    </ol>
+                        <img src="../../assets/images/PDFNetJSSetup.png" alt="PDFNetJS setup">
+                        <p>
+                        Note: This tutorial uses ES6 JavaScript promises and generators. For more information on promises and generators, refer to these online explanations:
+                            <li><a href="http://www.html5rocks.com/en/tutorials/es6/promises/">JavaScript Promises: There and back again</a>.</li>
+                            <li><a href="http://davidwalsh.name/async-generators">Going Async with ES6 Generators</a>.</li>
+                        </p>
+                    <h4>Step 1: Setting up your HTML document</h4>
+                    <p>
+                        Open up SampleTest.html with a text editor and copy/paste the following code into the HTML document.
+                        <br>
+                        <pre>
+                            <code class="xml">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;script src="WebViewer/jquery-3.2.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/CoreControls.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/external/FileSaver.min.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/lib/html5/pdf/PDFNet.js"&gt;&lt;/script&gt;
+  &lt;script src="WebViewer/samples/PDFNet/Setup.js"&gt;&lt;/script&gt;
+  &lt;script src="SampleTest.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body onload="runSampleTest();"&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+                            </code>
+                        </pre>
+                    </p>
+                    <p>
+                    Here we include PDFNetJS, the necessary libraries it depends on, and our crrently empty SampleTest.js custom file. Adding these files in a different order may result in errors. To initialize our script, the body executes function <font face="Consolas">runSampleTest()</font>, which we will soon add to SampleTest.js.
+                    </p>
+                    <h4>Step 2: Setting up your JavaScript Document</h4>
+                    <p>
+                        Open up SampleTest.js with a text editor and copy/paste the following code into the JavaScript document:
+                        <pre>
+                            <code class="javascript">
+var runSampleTest;
+(function(exports) {
+  "use strict";
+
+  // the path to where the PDF worker files are
+  CoreControls.setWorkerPath('WebViewer/lib/html5');
+
+  runSampleTest = function() {
+    function* main() {
+      // To be filled
+    }
+    PDFNet.runGeneratorWithCleanup(main());
+    // Alt: PDFNet.runGeneratorWithoutCleanup(main()); // does not deallocate anything after finishing.
+  }
+})(window);
+                            </code>
+                        </pre>
+                    <p>
+                        In this script, we have our <font face="Consolas">runSampleTest()</font> function wrapped inside an immediately invoked function expression. Inside the function we have a generator <font face="Consolas">continueIteration()</font> and an empty <font face="Consolas">main()</font> function that we will later fill out.
+                        <br>
+                        <br>
+                        <font face="Consolas">function* main()</font> will be where we add our custom code. In order to initialize <font face="Consolas">main()</font> we insert it function <font face="Consolas">PDFNet.runGeneratorWithCleanup(main());</font>
+                    </p>
+                    <h4>Step 3: Setting up your Main Function</h4>
+                    <p>
+                        Copy/paste the following code and use it to replace our currently empty <font face="Consolas">main()</font> function.
+                    </p>
+                    <pre>
+                        <code class="javascript">
+function* main() {
+  try {
+    var doc = yield PDFNet.PDFDoc.create();         // creates an empty pdf document
+    doc.initSecurityHandler();                      // initializes security handler
+    doc.lock();                                     // Locks all PNaCl operations on the document
+
+    // insert user code after this point
+    var pgnum = yield doc.getPageCount();
+    alert("Test Complete! Your file has " + pgnum + " pages");
+
+  } catch(err) {
+    console.log(err.stack)
+  }
+}
+                        </code>
+                    </pre>
+                    <p>
+                    Here we set up the basic requirements for a PDFNetJS script.
+                    <br>
+                    <br>
+                    <font style="background-color:#E6E6E6;" face="Consolas">yield PDFNet.PDFDoc.create()</font> - Creates an empty placeholder PDF document. All PDFNetJS functions return a promise, which means that for functions which return a value or object, we need to add a <font style="background-color:#E6E6E6;" face="Consolas">yield</font> statement in front to guarantee that the object is resolved by the time we use it. Without adding a <font face="Consolas">yield</font> statement, <font face="Consolas">PDFNet.PDFDoc.create()</font> will simply return a promise rather than the document we want.
+                    <br>
+                    <br>
+                    To open an existing PDF document, call <font face="Consolas"> yield PDFNet.PDFDoc.createFromURL("path/to/pdfdoc.pdf"); instead.</font>
+                    <br>
+                    <br>
+                    <font style="background-color:#E6E6E6;" face="Consolas">doc.initSecurityHander()</font> - Initializes security handler which is used to check for and handle password-locked PDFs.
+                    <br>
+                    <br>
+                    <font style="background-color:#E6E6E6;" face="Consolas">doc.lock()</font> - Locks all PNaCl operations on the document in order to avoid editing conflicts from other processes. More information is available in the advanced tutorial.
+                    <br>
+                    <br>
+                    <b>Running Our Own Code</b>:
+                    <br>
+                    <br>
+                    Now that we have properly set up our document, we can call read/write operations on it.
+                    <br>
+                    <br>
+                    <font style="background-color:#E6E6E6;" face="Consolas">yield doc.getPageCount()</font> - Returns a promise that contains the number of pages in the PDF document. Remember to call <font face="Consolas">yield</font> to resolve the promise.
+
+                    <h4>Testing</h4>
+                    To test if everything is working correctly, we have an alert message at the end of our try block that will output the number of pages in our PDF doc.
+                    <br>
+                    <br>
+                     <font style="background-color:#E6E6E6;" face="Consolas">alert("Test Complete! Your file has " + pgnum + " pages");</font>
+                    <br>
+                    <br>
+                        Since we have not added any pages to our pdf doc, the number of pages will be 0. Try swapping out <font face="Consolas">create()</font> with <font face="Consolas">createFromURL("path/to/pdfdoc.pdf")</font> to test the <font face="Consolas">getPageCount()</font> function on an existing PDF document.
+                    <br>
+                    <br>
+                    <font style="background-color:#E6E6E6;" face="Consolas">var doc = yield PDFNet.PDFDoc.createFromURL("myfile.pdf");</font>
+                    <br>
+                    <br>
+                        <img src="../../assets/images/PDFNetJSSetup2.png" alt="PDFNetJS setup with pdf">
+                        <br>
+                        <br>
+                        Run SampleTest.html on a server. The "Test Complete!" alert box should pop up after a few moments.
+                        <br>
+                        <br>
+                        <b>Converting Generator Code</b> (Important for IE usage):
+                        <br>
+                        <br>
+                        This tutorial and all other PDFNetJS tutorials use ES6 generator functions in JavaScript which are currently supported in Chrome, Firefox, and Opera, but may be unsupported in other browsers. If you are working with a browser without ES6 support, you can take a look at online ES6-to-ES5 transformers such as Facebook's <a href="https://github.com/facebook/regenerator">regenerator</a>.
+                        <br><br>
+                        For an example of how to switch between ES6 and ES5 compiled JavaScript code, see the HTML page of one of our <a href="http://pdftron.com/webviewer/pdfnetjs/pdfnetsamples.html">samples</a> (eg. AddImageTest.html).
+                        <h4>PDFNetJS Samples</h4>
+                        The best way to get started with writing your own PDFNetJS code is to run the PDFNetJS samples. You can find working samples and their source code on the <a href="http://pdftron.com/webviewer/pdfnetjs/pdfnetsamples.html">PDFNetJS samples page</a>.
+                        <br>
+                    <p>
+                        Useful links:
+                        <li><a href="../../lib/html5/doc/index.html">The PDFNetJS API</a></li>
+                        <li><a href="advanced.html">Locking and Memory Management Tutorial</a></li>
+                        <li><a href="viewer.html">WebViewer Tutorial</a></li>
+                        <li><a href="deckjs.html">DeckJS Tutorial</a></li>
+                        <li><a href="http://pdftron.com/webviewer/pdfnetjs/pdfnetsamples.html">Samples using PDFNetJS</a></li>
+                        <br>
+                        Questions? Try searching or asking in the <a href="https://groups.google.com/forum/#!forum/pdfnet-webviewer">WebViewer forum</a>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

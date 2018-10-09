@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html">
+    <script src="../../jquery-3.2.1.min.js"></script>
+    <script src="../../lib/WebViewer.min.js"></script>
+    <script src="../../lib/html5/ControlUtils.js"></script>
+    <script src="../../samples-key.js"></script>
+    <!-- Server script -->
+    <script src="https://www.gstatic.com/firebasejs/3.5.3/firebase.js"></script>
+    <script src="server.js"></script>
+    <!-- Main script -->
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="index.css">
+
+  </head>
+  <body>
+    <!-- An element to display WebViewer -->
+    <div id="viewer"></div>
+    <div class="popup-container">
+      <!-- A popup to display returning author's name -->
+      <div class="popup returning-author">
+        <div class="greeting">Welcome back</div>
+        <div class="name"></div>
+      </div>
+      <!-- A popup to for a new author to setup a name -->
+      <div class="popup new-author">
+        <div class="greeting">Welcome! Tell us your name :)</div>
+        <input class="name" autofocus />
+        <div class="button">Start</div>
+      </div>
+    </div>
+  </body>
+</html>

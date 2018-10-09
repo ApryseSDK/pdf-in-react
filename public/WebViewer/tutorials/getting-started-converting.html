@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <style>
+            .project img{
+                max-width: 700px;
+            }
+            table, td {
+                border: 1px solid lightgray;
+                border-collapse: collapse;
+                text-align: center;
+                padding: 5px;
+            }
+            td:first-child {
+                text-align: left;
+            }
+            tr:first-child {
+                font-weight: bold;
+                background: #C8DAF8;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Getting Started with XOD Files</h3>
+
+                    <p>
+                        The WebViewer solution supports viewing a wide range of document file formats by converting all documents to the XOD format. PDFTron provides the XOD conversion component in two forms. You can choose the one that suits your deployment, requirements and licensing needs.
+                    </p>
+
+                    <h4>PDFNet SDK with WebViewer Add-on</h4>
+                    <p>
+                        With this option, you get the benefit of using PDFNet SDK, our full-featured PDF SDK, on your server. Essentially you would be doing your own XOD conversions on your server with PDFNet. You can do  more advanced features here: e.g. apply your own watermark to all converted documents, add/remove pages to converted documents, merge annotations back to the original PDF. This gives you the most   flexibility and control over your documents.
+                    </p>
+
+                    <p>
+                        For more information, see <a href="http://www.pdftron.com/pdfnet">http://www.pdftron.com/pdfnet</a>.
+                        <br/>
+                        [Licensing: Available with <a href="http://www.pdftron.com/licensing/index.html">Redistributable Licensing</a>]
+                    </p>
+
+                    <h4>DocPub Command-line Converter</h4>
+                    <p>
+                        With this option, you run the conversions with a command-line tool. This works best if you have a static set of documents you want to convert in a batch, and upload to a server all at once.
+                    </p>
+
+                    <p>
+                        For more information, see <a href="http://www.pdftron.com/docpub/index.html">http://www.pdftron.com/docpub/index.html</a>.
+                        <br/>
+                        [Licensing: Available with <a href="http://www.pdftron.com/licensing/index.html">Redistributable Licensing</a>]
+                    </p>
+
+                    <h4>XOD Conversion Features by Converter Types</h4>
+                    <p>
+                        <table>
+                            <tr>
+                                <td></td>
+                                <td>PDFNet SDK</td>
+                                <td>DocPub CLI</td>
+                            </tr>
+                            <tr>
+                                <td>XOD Conversion</td>
+                                <td>&check;</td>
+                                <td>&check;</td>
+                            </tr>
+                            <tr>
+                                <td>XOD Encryption</td>
+                                <td>&check;</td>
+                                <td>&check;</td>
+                            </tr>
+                            <tr>
+                                <td>MS Office Documents Support</td>
+                                <td>&check; (Windows Only)</td>
+                                <td>&check; (Windows Only)</td>
+                            </tr>
+                            <tr>
+                                <td>Document Pre-Processing (PDF)</td>
+                                <td>&check;</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Built-in Annotation (XFDF) merging</td>
+                                <td>&check;</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>On-the-fly Conversion Streaming</td>
+                                <td>&check;</td>
+                                <td>&check;</td>
+                            </tr>
+                        </table>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

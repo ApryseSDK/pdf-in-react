@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+<!--ga-tag-->
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFNetJS</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../../index.html">Overview</a></li>
+                <li><a href="../../whatsnew.html">What's New</a></li>
+                <li><a href="../../documentation.html">Documentation</a></li>
+                <li><a href="../../samples.html">Samples</a></li>
+                <li><a href="../../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Advanced Features in PDFNetJS</h3>
+                    <p>
+                        To get started with setting up a PDFNetJS project, refer to our <a href="starting-out.html">starting tutorial</a>.
+                        <br>
+                        <br>
+
+                        PDFNetJS contains several methods for more advanced control over its processes via locking and memory management. This tutorial will provide an explanation of how to use these features and will also shed some light on the backend processes of PDFNetJS.
+                    </p>
+
+
+                    <h4>Understanding PDFNetJS Backend</h4>
+                    <p>
+                        For optimal performance, PDFNetJS uses two different backends to run its processes, PNaCl and Emscripten. PNaCl has good performance and supports multithreading but only works on Google Chrome. Emscripten starts up quickly and is compatible with most browsers, but has slower runtime performance. On the Google Chrome browser, PDFNetJS starts with its Emscripten backend while it compiles PNaCl. This means that when PDFNetJS first runs, it will consume additional CPU until PNaCl has finished compiling. Once the PNaCl compilation is complete, it will be cached and will no longer require any additional CPU and will use the PNaCl backend the next time it is run.
+                    </p>
+
+                    <h4>PDFNetJS Locking</h4>
+                    <p>
+                        Locking prevents multiple simultaneous accesses to a PDF document in a PDFNetJS program so that it cannot be changed by outside operations. PDFNetJS contains three main types of locking and unlocking statements:
+                        <br> <br>
+
+                        <font style="background-color:#E6E6E6;" face="Consolas">[PDFDoc].lock()</font> / <font style="background-color:#E6E6E6;" face="Consolas">[PDFDoc].unlock()</font> - Locks a PDF document to prevent competing threads from accessing the document at the same time. Threads attempting to access the document will wait in suspended state until the thread that owns the lock calls <font face="Consolas">doc.Unlock()</font>. Documents are automatically unlocked upon process completion if the user code is being run <font face="Consolas">PDFNet.runGeneratorWithCleanup(main())</font>.
+                        <br><br>
+                        <font style="background-color:#E6E6E6;" face="Consolas">[PDFDoc].lockRead()</font> / <font style="background-color:#E6E6E6;" face="Consolas">[PDFDoc].unlockRead()</font> - Locks the document to prevent competing write threads (using Lock()) from accessing the document at the same time. Read-only threads however, will be allowed to access the document. Threads attempting to obtain write access to the document will wait in suspended state until the thread that owns the lock calls <font face="Consolas">doc.unlockRead()</font>. Documents are automatically unlocked upon process completion if the user code is being run with <font face="Consolas">PDFNet.runGeneratorWithCleanup(main())</font>.
+                        <br><br>
+                        Note: To avoid deadlocks, obtaining a write lock while holding a read lock is not permitted and will throw an exception. If this situation is encountered please either unlock the read lock before the write lock is obtained or acquire a write lock (rather than read lock) in the first place.
+
+                        <br><br>
+                        Example of manual document locking and unlocking:
+                    </p>
+                    <pre>
+                        <code class="javascript">
+function* main() {
+  try {
+    var doc = yield PDFNet.PDFDoc.create();
+    doc.initSecurityHandler();
+    doc.lock(); // documents require locking.
+    // do stuff with document
+  } catch (err){
+    console.log(err);
+  } finally {
+    yield doc.unlock(); // unlocks the document
+  }
+}
+PDFNet.runGeneratorWithoutCleanup(main());
+// if you use PDFNet.runGeneratorWithCleanup(main()), no need to unlock
+                        </code>
+                    </pre>
+
+                    <font style="background-color:#E6E6E6;" face="Consolas">PDFNet.beginOperation()</font> / <font style="background-color:#E6E6E6;" face="Consolas">PDFNet.finishOperation()</font> - <font face="Consolas">beginOperation()</font> locks all worker operations on PDFNet. Both <font face="Consolas">PDFNet.runGeneratorWithCleanup()</font> and <font face="Consolas">PDFNet.runGeneratorWithoutCleanup()</font> call <font face="Consolas">beginOperation()</font> and end with <font face="Consolas">finishOperation()</font>, so <font face="Consolas">beginOperation()</font> and <font face="Consolas">finishOperation()</font> should only be used when PDFNet needs to be unlocked in the middle of a process.
+
+                    <pre>
+                        <code class="javascript">
+function* main() {
+  // ...
+}
+PDFNet.runGeneratorWithCleanup(main()); // Automatically locks all worker operations
+                        </code>
+                    </pre>
+
+                    Running multiple unrelated PDFNetJS operations simultaneously may result in race conditions. This can be resolved by synchronizing the PDFNetJS operations using a queue. The DeckJS sample demonstrates this by queuing its renderPage calls to prevent race conditions on its single shared PDFDraw object.
+                    <br><br>
+
+                    For this reason, calling <font face="Consolas">beginOperation()</font> a second time before <font face="Consolas">finishOperation()</font> is called will cause an exception to be thrown. If the need arises, this exception can be disabled by passing in an empty object into beginOperation with the object's "allowMultipleInstances" member set to true, but this is generally not recommended.
+
+                    <pre>
+                        <code class="javascript">
+// How to allow multiple PDFNet.beginOperation() calls
+var optionsObj = {};
+optionsObj.allowMultipleInstances = true;
+yield PDFNet.beginOperation(optionsObj);
+                        </code>
+                    </pre>
+
+
+                    <p>
+                        There are some cases where unlocking in the middle of a PDFNetJS proccess may be required. This usually happens if <font face="Consolas">requirePage()</font> needs to be called on a document.
+                    </p>
+                    The ViewerEdit sample on the <a href="http://pdftron.com/webviewer/pdfnetjs/pdfnetsamples.html">samples page</a> shows a situation where manual unlocking and re-locking may be used.
+                    <pre>
+                        <code class="javascript">
+var doc = yield PDFNet.PDFDoc.create();
+doc.initSecurityHandler();
+doc.lock();
+// ...
+
+// This section is only required to ensure the page is available
+// for incremental download. At the moment the call to requirePage must be
+// be wrapped in this manner to avoid potential deadlocks and
+// allow other parts of the viewer to run while the page is being downloaded.
+doc.unlock();
+yield PDFNet.finishOperation();
+// requirePage(pageNum) ensures that the first page is downloaded before it is accessed.
+yield doc.requirePage(1);
+yield PDFNet.beginOperation();
+doc.lock();
+                        </code>
+                    </pre>
+
+                    <h4>Memory Management</h4>
+                    <p>
+                        PDFNetJS automatically cleans up all objects in a process initialized using <font face="Consolas">PDFNet.runGeneratorWithCleanup()</font> once the process has finished running. But for more precise memory management, there are two manual ways to deallocate objects:
+                        <br>
+                        <br>
+                        <font style="background-color:#E6E6E6;" face="Consolas">[Obj].destroy()</font> - Deallocates individual objects. Not all PDFNetJS objects have and require this function however.
+                        <br>
+                        <br>
+                        <font style="background-color:#E6E6E6;" face="Consolas">PDFNet.startDeallocateStack()</font> / <font style="background-color:#E6E6E6;" face="Consolas">PDFNet.endDeallocateStack()</font> - Stack-based deallocation. Calling <font face="Consolas">endDeallocateStack()</font> will deallocate all objects that were created since the last call to <font face="Consolas">PDFNet.startDeallocateStack()</font>.
+                        <br><br>
+                        In general, stack-based deallocation is recommended because not all objects have a .destroy() method and it is easier to manage for larger sections of code.
+
+                        <br><br>
+                        Example of default/automatic deallocation:
+                        <pre>
+                            <code class="javascript">
+function* main() {
+  try {
+    var doc = yield PDFNet.PDFDoc.create(); // documents require deallocation
+    var page_iter = yield doc.getPageIterator(); // object that requires deallocation
+    var writer = yield PDFNet.ElementWriter.create(); // object that requires deallocation
+  } catch (err){
+    console.log(err);
+  }
+}
+PDFNet.runGeneratorWithCleanup(main()); // deallocates all objects once main() finishes running
+                            </code>
+                        </pre>
+                        Example of individual deallocation:
+                        <pre>
+                            <code class="javascript">
+function* main() {
+  try {
+    var doc = yield PDFNet.PDFDoc.create();
+    var page_iter = yield doc.getPageIterator();
+    var writer = yield PDFNet.ElementWriter.create();
+  } catch (err){
+    console.log(err);
+  } finally {
+    yield doc.destroy();
+    yield page_iter.destroy();
+    yield writer.destroy();
+  }
+}
+PDFNet.runGeneratorWithoutCleanup(main());
+                            </code>
+                        </pre>
+                        Example of Stack-based deallocation:
+                        <pre>
+                            <code class="javascript">
+function* main() {
+  try {
+    yield PDFNet.startDeallocateStack();
+    var doc = yield PDFNet.PDFDoc.create();
+    var page_iter = yield doc.getPageIterator();
+    var writer = yield PDFNet.ElementWriter.create();
+    yield PDFNet.endDeallocateStack();
+  } catch (err){
+    console.log(err);
+  }
+}
+PDFNet.runGeneratorWithoutCleanup(main());
+                            </code>
+                        </pre>
+                        <br>
+                        Useful links:
+                        <br><br>
+                        <li><a href="../../lib/html5/doc/index.html">The PDFNetJS API</a></li>
+                        <li><a href="starting-out.html">Starting Tutorial</a></li>
+                        <li><a href="viewer.html">Viewer Tutorial</a></li>
+                        <li><a href="documentation.html">The PDFNetJS API</a></li>
+                        <li><a href="http://pdftron.com/webviewer/pdfnetjs/pdfnetsamples.html">Samples using PDFNetJS</a></li>
+                        <br><br>
+
+                        Questions? Try searching or asking in the <a href="https://groups.google.com/forum/#!forum/pdfnet-webviewer">WebViewer forum</a>.
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

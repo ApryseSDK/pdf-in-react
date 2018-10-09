@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Getting Started with Config files</h3>
+
+                    <p>
+                        To make customizations to WebViewer simple and clean you can define everything in an external JavaScript config file. What's being referred to here as a "config file" is actually just an ordinary JavaScript file. What's special about it is that WebViewer will execute all of this code in the context of the viewer's iframe window. This gives you easy access to the <a href="../lib/html5/doc/symbols/CoreControls.Document.html">Document</a>, <a href="../lib/html5/doc/symbols/CoreControls.DocumentViewer.html">DocumentViewer</a> and <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html">AnnotationManager</a> objects (among others) which can allow you to make more complicated customizations.
+                    </p>
+                    <p>
+                        To instantiate WebViewer with a config file you just need to set the "config" option in the WebViewer constructor. For example:
+                        <pre>
+                            <code class="javascript">
+var myWebViewer = new PDFTron.WebViewer({
+  initialDoc: &quot;mydoc.xod&quot;,
+  config: &quot;path/to/my/config/file.js&quot;
+}, viewerElement);
+                            </code>
+                        </pre>
+
+                        The config file path should be relative to your HTML file. For more examples of config file use you can take a look at any of the HTML5 samples in the samples folder.
+                    </p>
+
+                    <p>
+                        Although you are able to modify ReaderControl.js and related files directly, it's preferred to contain your customizations within a config file as it makes upgrading to new WebViewer versions easier.
+                    </p>
+
+                    <h4>Useful Events</h4>
+
+                    <p>
+                        When the config file is executed the <em>readerControl</em> variable won't be defined and the XOD document won't be loaded yet so you can't immediately access these objects. You can listen for events on the HTML document object that will notify you at key points.
+                    </p>
+
+                    <p>
+                        The first important one is the <em>viewerLoaded</em> event. viewerLoaded will be fired after the ReaderControl object has been constructed, so you'll be able to access the <em>readerControl</em> variable along with DocumentViewer before the document has loaded. For example:
+                        <pre>
+                            <code class="javascript">
+$(document).on(&#39;viewerLoaded&#39;, function() {
+  var docViewer = readerControl.docViewer;
+  docViewer.setMargin(20);
+  docViewer.on(&#39;fitModeUpdated&#39;, function(e, fitMode) {
+    console.log(&#39;fit mode changed&#39;);
+  });
+});
+                            </code>
+                        </pre>
+                    </p>
+
+                    <p>
+                        Another important event is <em>documentLoaded</em>. Once documentLoaded has fired you can access Document and AnnotationManager. You'll also be able to use ReaderControl and DocumentViewer functions that use the page number. For example:
+                        <pre>
+                            <code class="javascript">
+$(document).on(&#39;documentLoaded&#39;, function() {
+  var docViewer = readerControl.docViewer;
+  var doc = docViewer.getDocument();
+  doc.loadThumbnailAsync(0, function(thumb) {
+    $(&#39;#myThumbnailDiv&#39;).append(thumb);
+  });
+
+  var annotManager = docViewer.getAnnotationManager();
+  var rectangle = new Annotations.RectangleAnnotation();
+  rectangle.PageNumber = 2;
+  rectangle.X = 100;
+  rectangle.Y = 100;
+  rectangle.Width = 250;
+  rectangle.Height = 250;
+  rectangle.Author = annotManager.getCurrentUser();
+  annotManager.addAnnotation(rectangle);
+
+  docViewer.displayLastPage();
+});
+                            </code>
+                        </pre>
+                    </p>
+
+                    <h4>Passing custom data</h4>
+
+                    <p>
+                        Sometimes you might want to send custom data from the "outer" page (with the PDFTron.WebViewer constructor) to the "inner" page (your config file). To do this you can use the <em>custom</em> option in the WebViewer constructor. The property expects a string value. So for example to pass an object:
+                        <pre>
+                            <code class="javascript">
+var myObj = {
+  startPage: 10
+};
+
+var myWebViewer = new PDFTron.WebViewer({
+  custom: JSON.stringify(myObj)
+}, viewerElement);
+                            </code>
+                        </pre>
+                    </p>
+
+                    <p>
+                        Then inside the config file you access this data as follows:
+                        <pre>
+                            <code class="javascript">
+var custom = JSON.parse(window.ControlUtils.getCustomData());
+console.log(custom.startPage) // outputs 10
+
+$(document).on(&#39;documentLoaded&#39;, function() {
+  var docViewer = readerControl.docViewer;
+  docViewer.setCurrentPage(custom.startPage);
+});
+                            </code>
+                        </pre>
+                    </p>
+
+                    <h4>Modifying the UI</h4>
+
+                    <p>
+                        By the time the config file is executed the DOM will have been loaded so you can safely access elements immediately. This example code hides the previous button if the user is on the first page and the next button if the user is on the last page.
+
+                        <pre>
+                            <code class="javascript">
+var docViewer;
+var $prevPage = $(&#39;#prevPage&#39;);
+var $nextPage = $(&#39;#nextPage&#39;);
+
+function updatePageButtons(pageNumber) {
+  if (pageNumber === 1) {
+    $prevPage.css(&#39;visibility&#39;, &#39;hidden&#39;);
+  } else {
+    $prevPage.css(&#39;visibility&#39;, &#39;visible&#39;);
+  }
+
+  if (pageNumber === docViewer.getPageCount()) {
+    $nextPage.css(&#39;visibility&#39;, &#39;hidden&#39;);
+  } else {
+    $nextPage.css(&#39;visibility&#39;, &#39;visible&#39;);
+  }
+}
+
+$(document).on(&#39;viewerLoaded&#39;, function() {
+  docViewer = readerControl.docViewer;
+
+  docViewer.on(&#39;pageNumberUpdated&#39;, function(e, pageNumber) {
+    updatePageButtons(pageNumber);
+  });
+});
+
+$(document).on(&#39;documentLoaded&#39;, function() {
+  updatePageButtons(1);
+});
+                            </code>
+                        </pre>
+                    </p>
+
+                    <p>
+                        Questions? Try searching or asking in the <a href="https://groups.google.com/forum/#!forum/pdfnet-webviewer">WebViewer forum</a>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

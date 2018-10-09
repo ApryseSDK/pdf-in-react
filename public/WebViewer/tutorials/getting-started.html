@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Getting Started with WebViewer.js</h3>
+
+                    <p>
+                        The PDFTron WebViewer is a JavaScript wrapper control that encapsulates the XOD and PDF viewer technologies. It provides a single, easy-to-use interface for loading documents and controlling the viewers.
+                    </p>
+                    <p>
+                        WebViewer will automatically select the appropriate type of viewer depending on web browser support.
+                    </p>
+
+                    <h4>Viewer Technologies</h4>
+
+                    <p>
+                        <u>HTML5 Viewer</u><br/>
+                        Included under lib/html5/ is the HTML5 ReaderControl, which leverages modern browsers' capabilities such as vector graphics and fonts to deliver the best possible user experience without the need for any plugins.
+                    </p>
+
+                    <p>
+                        <u>HTML5 Mobile Viewer</u><br/>
+                        Also included as part of the HTML5 viewer, the Mobile ReaderControl uses the same powerful HTML5 technology, but is optimized for mobile devices and tablets with touch events.
+                    </p>
+
+                    <p>
+                        <u>PDFNetJS</u><br/>
+                        Included under lib/html5/pdf is the PDF ReaderControl which extends the capabilities of WebViewer to take advantage of PDFTron's PDFNet in the browser (PDFNetJS) for precise rendering of PDF files. PDF documents do not need to be converted to the XOD format to work with this backend. Note that a license key specificly for PDFNetJS is required for viewing PDF files without a demo stamp.
+                    </p>
+
+                    <h4>Create your own WebViewer page</h4>
+
+                    <ol>
+                        <li>Download the <a href="https://www.pdftron.com/webviewer/download.html">WebViewer SDK</a> and unzip the package.</li>
+
+                        <li>Copy the lib/ folder and GettingStarted.xod to a location on your web server.</li>
+
+                        <li>Create an HTML page.</li>
+
+                        <li>Add the necessary scripts to the &lt;head&gt; of the HTML page.
+                        <pre>
+                            <code class="xml">
+&lt;script src=&quot;jquery-3.2.1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;lib/WebViewer.js&quot;&gt;&lt;/script&gt;
+                            </code>
+                        </pre>
+                        WebViewer.js depends on jQuery so it must be included. Instead of including WebViewer.js you could include WebViewer.min.js which is the minified version of the file.
+                        </li>
+
+                        <li>Create a &lt;div&gt; tag in the HTML &lt;body&gt; and give it an id. This will be the container for the WebViewer.
+                        <pre>
+                            <code class="xml">
+&lt;div&#160;id=&quot;viewer&quot;&gt;&lt;/div&gt;
+                            </code>
+                        </pre>
+                        Add a style for the viewer element so that it takes up a reasonably sized area.
+                        <pre>
+                            <code class="css">
+&lt;style&gt;
+  #viewer {
+    width: 1024px;
+    height: 600px;
+  }
+&lt;/style&gt;
+                            </code>
+                        </pre>
+                        </li>
+
+                        <li>Add the following script to create a new WebViewer instance
+                        <pre>
+                            <code class="xml">
+&lt;script&gt;
+  $(function() {
+    var viewerElement = document.getElementById(&quot;viewer&quot;);
+    var myWebViewer = new PDFTron.WebViewer({
+      path: &quot;lib&quot;,
+      type: &quot;html5&quot;,
+      initialDoc: &quot;GettingStarted.xod&quot;
+    }, viewerElement);
+  });
+&lt;/script&gt;
+                            </code>
+                        </pre>
+                            <p>
+                                The script above will create and render a WebViewer control on the page as a child of the provided &lt;div&gt; element.
+                            </p>
+                            <h4>PDFNetJS</h4>
+                            <p>
+                                It is now possible to load a PDF file directly in WebViewer. Simply specify the documentType option with a value of "pdf" and make sure that initialDoc points to a PDF file.
+                                <b>Note</b> that if you don't specify a (valid) license key then a demo stamp will be applied to the document. For example:
+                            </p>
+                            <pre>
+                                <code class="javascript">
+var myWebViewer = new PDFTron.WebViewer({
+  path: &quot;lib&quot;,
+  type: &quot;html5&quot;,
+  l: &quot;Your License Key Here&quot;,
+  documentType: &quot;pdf&quot;,
+  initialDoc: &quot;GettingStarted.pdf&quot;
+}, viewerElement);
+                                </code>
+                            </pre>
+                            Try viewing your HTML page on your web server. See an example <a href="getting-started/index.html">here</a>.
+
+                            <h4>Troubleshooting</h4>
+                            If the viewer or file didn't load correctly then there could be a few reasons.
+                            <ul>
+                                <li>Make sure that the initialDoc option is pointing to the correct file and that the file exists on your server. The path should be relative to the HTML file.</li>
+                                <li>Make sure that the path option is pointing to the lib folder. It should be relative to the HTML file.</li>
+                                <li>For XOD file viewing: The .xod file extension might need to be added to your server's allowed mime types list. Please consult your server's manual on how to add the following entry to its mime types list. Extension: .xod, Mime type: application/octet-stream or application/vnd.ms-xpsdocument.</li>
+                                <li>For PDF file viewing (using PDFNetJS): The .pexe, .nmf, .res and .mem file extensions might need to be added to your server's allowed mime types list. Please consult your server's manual on how to add the following entry to its mime types list. The following mime types should be added:
+                                <br>
+                                Extension: .res, Mime type: application/octet-stream
+                                <br>
+                                Extension: .pexe, Mime type: application/x-pnacl
+                                <br>
+                                Extension: .nmf, Mime type: application/octet-stream
+                                <br>
+                                Extension: .mem, Mime type: application/octet-stream
+                                <br>
+                                Extension: .wasm, Mime type: application/wasm
+                            </ul>
+
+                            <p>
+                                <b>Note</b><br/>
+                                For best performance your server should support HTTP range requests (most servers support this) if you are loading XOD files. If range requests are not supported then the HTML5 viewer will automatically fall back to downloading the entire document up front which can be slow. When range requests are used only the necessary parts of the file are downloaded as needed, providing much better performance and stability.<br/><br/>
+                                When using PDFNetJS to view PDF documents this is not applicable as the entire document needs to be downloaded.
+                            </p>
+
+                        </li>
+
+                        <li>
+                            It is now possible to use the "myWebViewer" variable to invoke ReaderControl's methods. For example, the following code demonstrates how to jump to page 2:
+                            <pre>
+                                <code class="javascript">
+myWebViewer.setCurrentPageNumber(2);
+                                </code>
+                            </pre>
+
+                            Additionally you can use jQuery event bindings to react to changed events. For example the following code shows how to be notified when the page changes.
+                            <pre>
+                                <code class="javascript">
+$(viewerElement).on(&quot;pageChanged&quot;, function(event) {
+  alert(&quot;Current page is: &quot; + myWebViewer.getCurrentPageNumber());
+});
+                                </code>
+                            </pre>
+
+                            Please refer to the <a href="../doc/symbols/PDFTron.WebViewer.html">API documentation</a> for other methods and events which can be used.
+                        </li>
+                    </ol>
+
+                    You can find the source files used in this tutorial under tutorials/getting-started
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

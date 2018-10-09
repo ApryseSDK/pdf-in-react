@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="x-ua-compatible" content="IE=edge">
+<title>PDFTron Web Appliance</title>
+<link rel="icon"
+      type="image/png"
+      href="Images/favicon_filled.png?v=2">
+<link href="css/font-awesome.min.css" rel="stylesheet" />
+
+<link href="css/basic_ie10.css" rel="stylesheet" />
+<link href="css/landing_ie10.css" rel="stylesheet" />
+
+<link href="css/basic.css" rel="stylesheet" />
+<link href="css/landing.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    window.IEVersion = (-1/* @cc_on,@_jscript_version@ */);
+    window.isIE10 = (window.IEVersion === 10);
+</script>
+<script src="../../jquery-3.2.1.min.js"></script>
+<script src="js/DocManager.js"></script>
+<script src="js/utilities.js"></script>
+<script src="../../lib/WebViewer.js"></script>
+<script src="../../samples-key.js"></script>
+</head>
+<body>
+<div id="landingcontainer" class="invisible landingcontainer">
+    <div id="titlerow">
+        <div id="eighthundred">
+            <h2 class="landingtitle" id="landingtitle"><span class="logotext">PDFT</span><span class="logotext" style="position:relative;left:-8px;">RON</span><span class="brandtext"> Web</span></h2>
+        </div>
+    </div>
+    <div id="landingpane" class="landingpane standalone">
+
+    <div class="landingcolumn leftpanel">
+        <div class="menuselector flexrow selected" id="left_landingdroptarget"><span>Open local file</span></div>
+        <div class="menuselector flexrow" id="left_landinguploaduri"><span>Open file by URL</span></div>
+        <div class="menuselector flexrow" id="left_landingrecentlist"><span>Recent files</span></div>
+        <div class="menuselector flexrow" id="left_imagenav"><span>Customize UI</span></div>
+        <div class="menuselector flexrow" id="left_infopanel"><span>Server info</span></div>
+        <div class="vertspacer flexrow"></div>
+        <div class="documentlink flexrow"><a href="../../samples.html" target="_blank">Other samples</a></div>
+        <div class="documentlink flexrow"><a href="../../documentation.html" target="_blank">Documentation</a></div>
+    </div>
+    <div class="landingcolumn rightpanel" id="settingsrightpanel">
+        <div class="centercol hideable notselected" id="landinguploaduri">
+            <div class="landinglabel"><span>Open file from this URL</span></div>
+            <div id="landinguriinputcontainer"><input type="text" id="landinguriinput" class="flexrow" placeholder="http://www.example.com/sample.pdf"></div>
+            <div class="button disabled" id="landinguributton"><span>Open file</span></div>
+        </div>
+        <div id="landingdroptarget" class="centercol droptarget hideable">
+            <div class="landinglabel" id="landmsg"><span>Drag-and-drop a file here to open it</span></div>
+            <div id="landingdroptargeticons"><i class="fa fa-cloud-upload bigicon"></i><i class="fa fa-cloud-upload bigicon overlay"></i></div>
+            <div class="landinglabel bottom" id="browse_files" ><span class="orspan">Or, </span><span id="landinguploadbutton" class="browsetext">browse files</span> on your computer</div>
+        </div>
+        <div id="landingrecentlist" class="recentlist col rightpanel hideable notselected">
+            <div class="recenttitle" id="recenttitle">Recently opened files</div>
+            <div class="recenttitle lighter" id="recenttitle">...Loading</div>
+        </div>
+        <div class="hideable notselected centercol" id="infopanel">
+            <div class="flexrow spacer"></div>
+            <div class="info title">Server Info</div>
+            <div class="flexrow">
+                <div class="info left">PDFNet</div>
+                <div class="right info"><span id="info_PDFNet_version"></span></div>
+            </div>
+            <div class="flexrow">
+                <div class="info left">Server</div>
+                <div class="right info"><span id="info_server_version"></span></div>
+            </div>
+            <div class="flexrow">
+                <div class="info left">Server OS</div>
+                <div class="right info"><span id="info_os_name"></span></div>
+            </div>
+            <div class="flexrow">
+                <div class="info left">Hardware</div>
+                <div class="right info"><span id="info_num_cpu"></span> <span id="info_os_arch"></span> cores</div>
+            </div>
+            <div class="flexrow">
+                <div class="info left">Server load</div>
+                <div class="usagebar info right flexrow"><div id="cpuusagebar" class="innerusagebar"></div><span id="info_process_load"></span></div>
+            </div>
+            <div class="flexrow">
+                <div class="info left">Memory usage</div>
+                <div class="usagebar info right flexrow"><div id="memusagebar" class="innerusagebar"></div><span id="info_mem_load"></span></div>
+            </div>
+            <div class="flexrow spacer"></div>
+            <div class="flexrow spacer"></div>
+        </div>
+        <div class="col hideable unselectable notselected imagenav" id="imagenav">
+            <div class="featurerow flexrow">
+                <div class="landingcolumn featurecolumn col" >
+                    <div class="label feature toolbar" id="featToolbar"><div class="check"><i class="fa fa-check"></i></div><span>Nav toolbar</span></div>
+                    <div class="label feature gallery" id="featGallery"><div class="check"><i class="fa fa-check"></i></div><span>Gallery</span></div>
+                </div>
+                <div class="landingcolumn featurecolumn col">
+                    <div class="label feature annots" id="featAnnots"><div class="check"><i class="fa fa-check"></i></div><span>Annotations</span></div>
+                    <div class="label feature collab" id="featCollab"><div class="check"><i class="fa fa-check"></i></div><span class="optionlabel">Realtime Collab</span></div>
+                </div>
+            </div>
+            <div class="flexrow svg">
+                <svg version="1.1" id="svgpictorial" class="wvpictorial" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 14.0 100 80"  xml:space="preserve">
+                    <rect class="no_stroke gray_fill" x="30" y="32" width="66" height="63"/>
+                    <rect class="paper_rect" x="35" y="36" width="56" height="59"/>
+                    <text x="38" y="42" class="title_text">Document Title</text>
+                    <text x="38" y="47" class="body_text">Lorem ipsum dolor sit amet, consectetur adipiscing</text>
+                    <text x="38" y="51" class="body_text">minim veniam, quis nostrud exercitation</text>
+                    <text x="38" y="55" class="body_text">quae ab illo inventore veritatis et quasi</text>
+                    <text x="38" y="61" class="title_text">Another Heading</text>
+                    <text x="38" y="66" class="body_text">Lorem ipsum dolor sit amet, consectetur adipiscing</text>
+                    <text x="38" y="70" class="body_text">minim veniam, quis nostrud exercitation</text>
+                    <text x="38" y="74" class="body_text">quae ab illo inventore veritatis et quasi</text>
+                    <text x="39" y="79" class="body_text">- veritatis et quasi</text>
+                    <text x="39" y="83" class="body_text">- enim ad minima veniam</text>
+                    <text x="39" y="87" class="body_text">- eius modi tempora</text>
+
+                    <rect class="basic_line_color no_stroke default_fill" x="30" y="26" width="66" height="6"/>
+                    <rect class="no_stroke svg_thin_line default_dark_fill" x="81" y="27.5" width="13" height="3"/>
+                    <rect class="annots_line_color no_stroke annots_fill" x="54" y="27.5" width="23" height="3"/>
+
+                    <rect class="collab_line_color svg_no_stroke collab_fill" x="79" y="32" width="17" height="63"/>
+                    <rect class="collab_line_color no_stroke collab_dark_fill" x="81" y="37" width="13" height="8"/>
+                    <line class="collab_line_color svg_thin_line" x1="83" y1="39" x2="87" y2="39"/>
+                    <rect class="collab_line_color no_stroke collab_dark_fill" x="81" y="57" width="13" height="7"/>
+                    <line class="collab_line_color svg_thin_line" x1="83" y1="59" x2="87" y2="59"/>
+                    <rect class="collab_line_color no_stroke collab_dark_fill" x="81" y="67" width="13" height="7"/>
+                    <line class="collab_line_color svg_thin_line" x1="83" y1="69" x2="87" y2="69"/>
+
+
+
+                    <line class="annots_line_color title_highlight" x1="39" y1="40.5" x2="57" y2="40.5"/>
+                    <line class="annots_line_color body_highlight" x1="51" y1="54.5" x2="59" y2="54.5"/>
+                    <line class="annots_line_color svg_thin_line" x1="38" y1="62" x2="54" y2="62"/>
+
+                    <line class="annots_line_color svg_thin_line" x1="55" y1="62" x2="72" y2="58"/>
+                    <line class="annots_line_color svg_thin_line" x1="55" y1="58" x2="72" y2="62"/>
+
+                    <line class="annots_line_color svg_thin_line" x1="58" y1="78" x2="60" y2="73"/>
+                    <line class="annots_line_color svg_thin_line" x1="58" y1="78" x2="68" y2="68" />
+                    <line class="annots_line_color svg_thin_line" x1="58" y1="78"  x2="62" y2="77" />
+                    <rect class="toolbar_line_color no_stroke svg_line toolbar_fill" x="30" y="17" width="66" height="7">
+                    </rect>
+                    <rect class="toolbar_line_color no_stroke svg_thin_line toolbar_dark_fill" x="31.5" y="18.5" width="4" height="4"/>
+                    <rect class="collab_line_color svg_no_stroke overidable collab_fill" x="88" y="18.5" width="6.5" height="4"/>
+                    <rect class="gallery_line_color no_stroke gallery_fill" x="4" y="26" width="24" height="69"/>
+                    <path id="imagefile-path" class="gallery_line_color svg_thin_line gallery_dark_fill" x="6"  y="28" transform="translate(6.5,34) scale(0.0047,-0.0039)" d="M1024 1024v472q22 -14 36 -28l408 -408q14 -14 28 -36h-472zM896 992q0 -40 28 -68t68 -28h544v-1056q0 -40 -28 -68t-68 -28h-1344q-40 0 -68 28t-28 68v1600q0 40 28 68t68 28h800v-544z" />
+
+                    <use xlink:href="#imagefile-path" x="11.25" y="0" />
+
+                    <use xlink:href="#imagefile-path" x="0" y="10" />
+
+                    <use xlink:href="#imagefile-path" x="11.25" y="10" />
+
+                    <use xlink:href="#imagefile-path" x="0" y="21" />
+
+                    <use xlink:href="#imagefile-path" x="11.25" y="21" />
+
+                    <use xlink:href="#imagefile-path" x="0" y="32" />
+
+                    <use xlink:href="#imagefile-path" x="11.25" y="32" />
+
+                    <use xlink:href="#imagefile-path" x="0" y="43" />
+                </svg>
+            </div>
+        </div>
+        <div class="landingrow seprow" id="seprow"><hr></div>
+        <div class="landingrow linkrow" ><a href="WebViewer/samples.html" target="_blank">Other samples</a></div>
+    </div>
+    <div class="zerosize">
+        <input type="file" id="fileinput" />
+        <input type="file" id="landingfileinput" />
+    </div>
+</div>
+</div>
+<div id="vertcontainer" class="viewerpane">
+    <div id="package-container" style="flex:1;width:100%;margin:0px;padding:0px;">
+        <div id="gallery" class="span3 invisible">
+            <div id="gallerytitle">Document Gallery</div>
+            <div id="thumbnails"></div>
+        </div>
+        <div class="column" id="viewercontainer">
+            <div id="overlay" class="flexy lightcolored notshown">
+                <div id="centerbox" class="flexy">
+                    <div id="uploadprogress" class="notshown row flexy darkcolored">
+                        <i class="fa fa-download bigicon" id="progressicon"></i>
+                        <div class="largeuiblurb"><span id="progresstext">Uploading...</span></div>
+                    </div>
+                    <div id="droptarget" class="row flexy droptarget">
+                        <div class="landinglabel" id="landmsg"><span>Drag-and-drop a file here to open it</span></div>
+                        <div id="droptargeticons"><i class="fa fa-cloud-upload bigicon"></i><i class="fa fa-cloud-upload bigicon overlay"></i></div>
+                        <div class="landinglabel bottom" id="browse_files"><span class="orspan">Or, </span><span id="uploadbutton" class="browsetext">browse files</span> on your computer</div>
+                        <button id="midbar_last" class="button-light setting-button">
+                        <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                        </svg>
+                    </button>
+                    </div>
+                </div>
+                <div id="urluploadbox" class="notshown">
+                    <i class="fa fa-upload"></i>
+                </div>
+            </div>
+            <div id="viewer"></div>
+        </div>
+    </div>
+    <div id="topbar" class="flexrow topbar hideshare">
+        <div class="left container flexrow">
+            <a class="bigonly" href="https://www.pdftron.com/" id="pdftron_home_link">
+                <img src="Images/logo.svg" width="204" height="22" class="topbar-logo" />
+            </a>
+            <button id="topbar_landingdroptarget" class="button-light setting-button">
+                <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                </svg>
+                <span>Open file</span>
+            </button>
+            <button id="mopbar_last" class="button-light setting-button smallonly">
+                <svg fill="#000000" height="36" viewBox="0 0 24 24" width="36" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+            </button>
+
+            <button id="topbar_imagenav" class="button-light setting-button">
+                <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                </svg>
+                <span>Settings</span>
+            </button>
+        </div>
+        <div class="spacer"></div>
+        <div class="wierd spacer"></div>
+        <div id="topbar_landingrecentlist" class="title"></div>
+        <div class="spacer"></div>
+        <div id="share-section" class="share flexrow">
+            <i class="fa fa-user usericon"></i>
+            <span id="user-header"></span>
+            <button id="share-link-button" class="button-light">
+                <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                </svg>
+                <span>Share link</span>
+            </button>
+        </div>
+        <button id="samples" class="button">Samples</button>
+        <button id="documentation" class="button">Documentation</button>
+        <a id="p-link" class="smallonly topbar-logo" href="https://www.pdftron.com/">
+                <img src="Images/logo_P.svg" width="32" height="28"/>
+        </a>
+        <div class="zerosize"></div>
+    </div>
+</div>
+
+<div id="clickthrough-overlay" classes="flexy lightcolored notshown clickthrough">
+    <div id="notification" class="notshown">Share link copied to clipboard.</div>
+</div>
+<!-- Webviewer initialization code here -->
+<script type="text/javascript" src="js/viewerpage.js"></script>
+<script type="text/javascript" src="js/landing.js"></script>
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+    if (window.IEVersion < 10 && window.IEVersion !== -1) {
+      console.log('The sample must be run on IE10 or greater.');
+      document.body.innerHTML = '<div id="compatwarn"><i class="fa fa-ban"></i><span id="warnspan">The sample must be run on IE10 or greater.</span></div>';
+    }
+</script>
+</body>
+
+</html>

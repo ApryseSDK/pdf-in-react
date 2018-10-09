@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+
+        </style>
+        <link rel="stylesheet" href="assets/style.css" />
+        <link rel="stylesheet" href="assets/colorbox/colorbox.css" />
+        <script src="assets/jquery-1.8.3.min.js"></script>
+        <script src="assets/colorbox/jquery.colorbox-min.js"></script>
+        <style>
+            #content li{
+                padding: 5px 0;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="index.html">Overview</a></li>
+                <li><a href="whatsnew.html">What's New</a></li>
+                <li><a href="documentation.html" class="active">Documentation</a></li>
+                <li><a href="samples.html">Samples</a></li>
+                <li><a href="tutorials.html">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+            <div class="wrapper">
+                <h2>Documentation</h2>
+                <div id="guides" class="project">
+                    <h3>Guides</h3>
+                    <p>
+                        Included in this package are two guides:
+
+                    </p>
+                    <ul>
+                        <li>
+							<b>User Guide:
+							<a target="_blank" href="doc/WebViewer_User_Guide.html">[HTML]</a>&nbsp;
+							<a target="_blank" href="doc/WebViewer_User_Guide.pdf">[PDF]</a>
+							</b>
+                            This document describes how to use WebViewer features from an end-user's perspective.<br/>
+                        </li>
+                        <li>
+							<b>Developer Integration Guide:
+							<a target="_blank" href="doc/WebViewer_Developer_Guide.html">[HTML]</a>&nbsp;
+							<a target="_blank" href="doc/WebViewer_Developer_Guide.pdf">[PDF]</a>
+							</b>
+							This guide is intended to help developers integrate WebViewer into their own application.
+                            Please also see the samples pages.
+                        </li>
+                    </ul>
+                </div>
+                <div id="api" class="project">
+                    <h3>API Reference</h3>
+                    <p>
+                        Also available are the API References for WebViewer and each of its viewers
+                    </p>
+                    <ul>
+                        <li>
+                            <a href="doc/symbols/PDFTron.WebViewer.html" target="_blank">WebViewer.js</a>: This API reference details how to use the WebViewer.js viewer wrapper.
+                            <br/>
+                            Developers can refer to this API reference for integrating WebViewer with their own applications.
+                        </li>
+                        <li>
+                            <a href="lib/html5/doc/symbols/CoreControls.html" target="_blank">WebViewer HTML5:</a> This API reference details how to use the DocumentViewer component, as well as the full-featured and customizable ReaderControl.
+                            <br/>Developers can refer to this API reference for making customizations to the HTML5 WebViewer.
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="started" class="project">
+                    <h3>Getting Started</h3>
+                    <p>
+                        To get started, convert your documents to the web-optimized XOD file.
+                        Choose from one of the following options:
+                    </p>
+                    <ol>
+                        <li><b>DocPub CLI:</b> a command-line tool that converts documents to XOD</li>
+                        <li><b>PDFNet SDK with WebViewer add-on:</b> the full PDFNet SDK for working with PDF files and exporting them to XOD</li>
+                    </ol>
+                    <p>
+                        For more information, please visit <a href="http://www.pdftron.com/webviewer/getstarted.html" target="_blank">http://www.pdftron.com/webviewer/getstarted.html</a>
+                    </p>
+
+                    <p>
+                        Once you have converted your documents to XOD files, all you need to do is pass your XOD file URL to the WebViewer.
+                        The most basic usage of WebViewer is as simple as this:
+                    <pre>
+&lt;script&gt;
+var myWebViewerContainer = document.createElement(&quot;div&quot;);
+var myWebViewer = new PDFTron.WebViewer({
+    initialDoc : &quot;path/to/xod&quot;
+}, myWebViewerContainer);
+&lt;/script&gt;
+                    </pre>
+                    </p>
+
+                    <p>
+                        For PDF documents it's just as simple. See the <a href="tutorials/getting-started.html">Getting Started tutorial</a> for more information.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+
+        </div>
+    </body>
+</html>
+

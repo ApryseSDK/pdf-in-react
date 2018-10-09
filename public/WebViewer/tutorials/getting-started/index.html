@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="../../jquery-3.2.1.min.js"></script>
+        <script src="../../lib/WebViewer.js"></script>
+
+        <script>
+            $(function() {
+                var viewerElement = document.getElementById("viewer");
+                var myWebViewer = new PDFTron.WebViewer({
+                    path: "../../lib",
+                    type: "html5",
+                    initialDoc: "../../GettingStarted.xod"
+                }, viewerElement);
+
+                $(viewerElement).on("pageChanged", function(event) {
+                    alert("Current page is: " + myWebViewer.getCurrentPageNumber());
+                });
+            });
+        </script>
+
+        <style>
+            #viewer {
+                width: 1024px;
+                height: 600px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="viewer"></div>
+    </body>
+</html>

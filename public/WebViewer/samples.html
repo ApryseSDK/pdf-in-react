@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/colorbox/colorbox.css" />
+    <link href="lib/html5/external/jquery-ui/themes/cloud/jquery-ui-1.11.1.custom.min.css" rel="stylesheet">
+    <script src="assets/jquery-1.8.3.min.js"></script>
+    <script src="lib/html5/external/jquery-ui/jquery-ui-1.11.1.custom.min.js"></script>
+    <script src="assets/colorbox/jquery.colorbox-min.js"></script>
+    <script src="lib/html5/ControlUtils.js"></script>
+    <script>
+            $(document).ready(function() {
+                $('#radio').buttonset();
+
+                function SetPDFDesc() {
+                    $('#backendDesc').html("View Documents natively in the browser, no server processing required.<ul><li>Supports .pdf, .docx, .xlsx, .pptx, markdown, and image formats.</li><li>Supported on all recent browsers. (does not include IE9 and older mobile browsers)</li></ul>");
+                    var pdfnet_js_samples = $("#PDFNet_js");
+                    if(pdfnet_js_samples.length > 0) {
+                        pdfnet_js_samples.removeClass("xod-hidden");
+                    }
+                };
+
+                function SetXODDesc() {
+                    $('#backendDesc').html("View Documents by pre-converting to XOD format.<ul><li>Supports virtually any file format.</li><li>Supported on all platforms.</li></ul>");
+                    var pdfnet_js_samples = $("#PDFNet_js");
+                    if(pdfnet_js_samples.length > 0) {
+                        pdfnet_js_samples.addClass("xod-hidden");
+                    }
+                };
+
+
+
+                $(window).on('resize', function(e) {
+                    $.colorbox.resize({width: "95%", height: "95%"});
+                });
+                if (window.location.href.indexOf("file://") === 0) {
+                    $('.error-message').show();
+                    $("a.colorbox").click(function() {
+                        alert("Error: Please run this sample on an HTTP web server.");
+                        return false;
+                    });
+                } else {
+                    $a_colorbox = $("a.colorbox");
+                    var isMobile = (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i)
+                            || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i)
+                            || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Touch/i)
+                            || navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/Silk/i));
+
+                    if (isMobile) {
+                        $a_colorbox = $a_colorbox.not('.mobile');
+
+                        $a_colorbox.click(function(e) {
+                            e.preventDefault();
+                            alert('This sample is not supported on mobile devices.');
+                        });
+                    } else {
+                        $a_colorbox.colorbox({iframe: true, width: "95%", height: "95%",
+                            reposition: true,
+                            onOpen: function() {
+                                $('body').css({
+                                    'overflow': 'hidden'
+                                });
+                            },
+                            onCleanup: function() {
+                                $('body').css({
+                                    'overflow': ''
+                                });
+                                $("#content").css('visibility', 'visible');
+                            }
+                        });
+
+                        $('.colorbox .title').append('<span class="external" title="open sample in new window"></span>');
+                        $(".external").click(function() {
+                            var url = $(this).closest('a').attr('href');
+                            window.open(url);
+                            return false;
+                        });
+                    }
+
+                }
+
+                function showSamples(mode) {
+                    var modeClass = '.' + mode;
+                    $('.tab, .project').not(modeClass).hide();
+                    $(modeClass).show();
+                }
+
+                function changeUrls(mode) {
+                    var $links = $('a.colorbox');
+                    $links.each(function(i, ele) {
+                        var $this = $(this);
+                        var url = $this.attr('href').split('?');
+                        $this.attr('href', url[0] + '?doctype=' + mode);
+                    });
+                }
+
+                var queryParams = window.ControlUtils.getQueryStringMap(false);
+                var sampleMode = queryParams.getString('s', 'xod');
+                $('#radio' + sampleMode.toUpperCase()).prop('checked', true).button('refresh');
+                function UpdateSampleBackend() {
+                    sampleMode = 'xod';
+                    if ($('#radioPDF').prop('checked')) {
+                        sampleMode = 'pdf';
+                    }
+                    if(sampleMode === 'pdf') {
+                        SetPDFDesc();
+                    }
+                    else {
+                        SetXODDesc();
+                    }
+                    showSamples(sampleMode);
+                    changeUrls(sampleMode);
+                }
+                UpdateSampleBackend();
+                $('#radio').on('change', function() {
+                    UpdateSampleBackend();
+                });
+            });
+        </script>
+    <style>
+        .sub-item{
+            font-size: smaller;
+            padding:0
+        }
+        .xod-hidden {
+            display:none;
+        }
+        #samples-filter div {
+            margin-left: 8px;
+            margin-bottom: 6px;
+            vertical-align: middle;
+        }
+        #radio {
+            display: inline-block;
+        }
+        #radio .ui-button-text {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            padding: 0.0em 0.4em 0.1em 0.4em;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="header">
+        <div class="wrapper" style="text-align:center">
+            <h1>PDFTron WebViewer</h1>
+        </div>
+    </div>
+        <div class="sub-header">
+            <ul class="menu" >
+                <li><a href="index.html">Overview</a></li>
+                <li><a href="whatsnew.html">What's New</a></li>
+                <li><a href="documentation.html">Documentation</a></li>
+                <li><a href="samples.html" class="active">Samples</a></li>
+                <li><a href="tutorials.html">Tutorials</a></li>
+            </ul>
+        </div>
+    <div id="content">
+        <div class="wrapper">
+            <div class="section error-message" style="display:none">
+                Warning: You are currently loading this page through the file protocol.
+                    To run the samples, please run this page on an HTTP Web Server.
+            </div>
+
+
+
+            <h2 id="samples-filter">
+                Backend:
+                <div id="radio">
+                    <input type="radio" id="radioPDF" name="radio" checked="checked"><label for="radioPDF">PDF/Office</label>
+                    <input type="radio" id="radioXOD" name="radio"><label for="radioXOD">XOD</label>
+                </div>
+            </h2>
+            <div></div>
+            <div id="backendDesc">
+             <ul>
+                <li>View Documents natively in the browser, no server processing required.</li>
+                <li>Supports .pdf, .docx, .xlsx, .pptx, markdown, and image formats.</li>
+                <li>Supported on all recent browsers. (does not include IE9 and older mobile browsers)</li>
+            </ul>
+            </div>
+            <div id="webviewer" class="tab xod pdf">
+                <div id="PDFNet_js" class="xod-hidden">
+                    <h2>PDFNetJS Samples</h2>
+                    <p>
+                        Click <a href="pdfnetsamples.html">here</a> for examples using the new PDFNetJS API.
+                    </p>
+                </div>
+                <h2>WebViewer.js Samples</h2>
+                <p>
+                    The following examples show features with the easy-to-use WebViewer.js API.
+                </p>
+                <div class="project xod pdf" id="basic">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Basic Viewer"
+                           href="samples/basic/index.html">
+                        <div class="thumb basic"></div>
+                        <div class="title">Basic Viewer</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to load a WebViewer instance. It also shows how to customize the page to load
+                            different files.
+                            <br/>
+                        </p>
+
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project pdf" id="office">
+                    <a class="colorbox" target="_blank"
+                           title="Viewing Office Files"
+                           href="samples/office/index.html">
+                        <div class="thumb office"></div>
+                        <div class="title">Viewing Office Files</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how WebViewer can be used to view MS Office files natively within the browser.
+                                It features a filepicker, and a viewer theme that changes color dynamically based on the tytpe of file being viewed.
+                            <br/>
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod pdf" id="user-permissions">
+                    <a class="colorbox" target="_blank"
+                           title="Annotation User Permissions"
+                           href="samples/user-permissions/index.html">
+                        <div class="thumb users"></div>
+                        <div class="title">Annotation User Permissions</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how WebViewer handles user permissions for annotations.
+                                When an annotation user is set, the client-side end users can only modify annotations that were created by them.
+                                Users can also be given administrative access, which allows modifications to annotations created by any users.
+                                Lastly, WebViewer can also be loaded in read-only mode, which allows existing annotations to be displayed but users will not be allowed to create new annotations.
+                            <br/>
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod pdf" id="cors">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Cross-origin resource sharing"
+                           href="samples/cors/index.html">
+                        <div class="thumb cors"></div>
+                        <div class="title">Cross-origin resource sharing</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how WebViewer can be hosted on a different server than the actual documents.
+                                Here, the document files are fetched from Amazon S3.
+                                <br/>
+                                The server hosting the files must support CORS.
+
+                               <br/>
+                               <i>Note that on IE9, CORS is not supported. You can use the <a href="tutorials/xdomain.html">xdomain library</a> to work around this but xdomain is only necessary for IE9. If you're not supporting IE9 then it is highly recommended NOT to use xdomain.</i>
+                            </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod pdf" id="custom-controls">
+                    <a class="colorbox mobile" target="_blank"
+                           title="WebViewer.js Custom Controls"
+                           href="samples/webviewer-controls/webviewer-controls.html">
+                        <div class="thumb webviewer-controls"></div>
+                        <div class="title">WebViewer.js Custom Controls</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to use the WebViewer.js controller (JavaScript API) to create an instance of WebViewer with custom controls.
+                            <br/>
+                        </p>
+
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+            <div id="html5"  class="tab xod pdf">
+                <h2>Config and Advanced Samples</h2>
+                <p>
+                    The following examples show more advanced ways to customize WebViewer. For example heavier usage of config files or using the WebViewer API without ReaderControl.
+                </p>
+                <div class="project pdf" id="color-separations">
+                    <a class="colorbox" target="_blank"
+                           title="Color Separations"
+                           href="samples/color-separations/index.html">
+                        <div class="thumb color-separations"></div>
+                        <div class="title">Color Separations</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to use the document color separations APIs. These APIs allow you to enable and disable particular color separations in the viewer and also retrieve the percentage of each color at a particular point on the page.
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="angular">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Angular"
+                           href="samples/angular/README.md">
+                        <div class="thumb angular"></div>
+                        <div class="title">Angular</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to integrate WebViewer into an Angular application. It creates a component for WebViewer and shows how you can interact with the WebViewer API from other components.
+                            </p>
+
+                            <hr/>
+                            <p>
+                                Sources: <a href="samples/angular/src/app/webviewer.component.ts" title="WebViewer component">webviewer.component.ts</a>, <a href="samples/angular/src/app/app.component.ts" title="App Component that uses WebViewer component">app.component.ts</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project pdf" id="page-operations">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Page Operations"
+                           href="samples/page-operations/index.html">
+                        <div class="thumb page-operations"></div>
+                        <div class="title">Page Operations</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to use the document page operations APIs. These APIs persist their changes to the copy of the document on the client and when downloading the file all of the changes will be present in the output PDF.
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="collaboration">
+                    <a class="colorbox" target="_blank"
+                           title="Realtime Collaboration"
+                           href="samples/realtime-collaboration/index.html">
+                        <div class="thumb realtime-collaboration"></div>
+                        <div class="title">Realtime Collaboration</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how the setup HTML5 WebViewer to have realtime syncing of annotations with a server. This example uses Firebase as an example backend. The sample source file main.js and server.js include code that defines how to import/export annotations and add event listeners to annotation add/edit/delete events.
+                            </p>
+
+                            <hr/>
+                            <p>
+                                Sources: <a href="samples/realtime-collaboration/main.js" title="Example of loading a custom annotation script to ReaderControl">main.js</a>, <a href="samples/realtime-collaboration/server.js" title="Example of loading a custom annotation script to ReaderControl">server.js</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project pdf" id="layers">
+                    <a class="colorbox"
+                           href="samples/layers/index.html"
+                           title="View Local PDF with Layers"  target="_blank">
+                        <div class="thumb layers"></div>
+                        <div class="title">View Local PDF with Layers</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how layers within a PDF can be displayed and toggled in WebViewer.
+                        </p>
+                        <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/layers/config.js" class="colorbox"
+                                           title="Layers Config File">config.js</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project pdf" id="local-pdf">
+                    <a class="colorbox mobile"
+                           href="samples/local-pdf/index.html"
+                           title="View Local PDF"  target="_blank">
+                        <div class="thumb local-pdf"></div>
+                        <div class="title">View Local PDF</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how a local PDF file can be selected from a file picker and displayed in WebViewer. Also note the download button which
+                                allows the document to be downloaded along with all the annotations that have been added.
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod pdf" id="custom-forms">
+                    <a class="colorbox mobile"
+                           href="samples/custom-forms/index.html"
+                           title="Customize Forms"  target="_blank">
+                        <div class="thumb customize-forms"></div>
+                        <div class="title">Customize Forms</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to customize the styles of form fields. It changes the colors of text fields and buttons dynamically.
+                        </p>
+                        <hr/>
+                        <p>
+                            Source: <a href="config.html#file=samples/custom-forms/config.js" class="colorbox mobile"
+                                       title="Customize Forms Config File">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod pdf" id="custom-signature">
+                    <a class="colorbox mobile"
+                           href="samples/custom-signature/index.html"
+                           title="Customize Signature"  target="_blank">
+                        <div class="thumb customize-signature"></div>
+                        <div class="title">Customize Signature</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to customize the signature tool. It draws a custom background on the signature menu
+                                and then saves and loads the default signature from localStorage.
+                        </p>
+                        <hr/>
+                        <p>
+                            Source: <a href="config.html#file=samples/custom-signature/config.js" class="colorbox mobile"
+                                       title="Customize Signature Config File">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="hide-annotations">
+                    <a class="colorbox"
+                           href="samples/hide-annotations/index.html"
+                           title="Hide/Show Annotations of Specific Users"  target="_blank">
+                        <div class="thumb hide-annotations"></div>
+                        <div class="title">Hide/Show Annotations of Specific Users</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how annotations from specific users can be hidden and shown. This could allow you to only display
+                                annotations from the current user for example.
+                        </p>
+                        <hr/>
+                        <p>
+                            Source: <a href="config.html#file=samples/hide-annotations/config.js" class="colorbox mobile"
+                                       title="Hide/Show Annotations Config File">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="stamp-image">
+                    <a class="colorbox mobile"
+                           href="samples/stamp-image/index.html"
+                           title="Stamp Annotation from Image"  target="_blank">
+                        <div class="thumb stamp"></div>
+                        <div class="title">Stamp Annotation from Image</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how a stamp annotation can have an image associated with it. It also highlights the built in stamp annotation tool that allows users to create a stamp from an image on their file system.
+                        </p>
+                        <hr/>
+                        <p>
+                            Source: <a href="config.html#file=samples/stamp-image/config.js" class="colorbox mobile"
+                                       title="Stamp Annotation from Image Config File">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="text-position">
+                    <a class="colorbox"
+                           href="samples/text-position/index.html"
+                           title="Get Text Position"  target="_blank">
+                        <div class="thumb text-position"></div>
+                        <div class="title">Get Text Position</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to get the positions of characters on a page.  It then adds highlight annotations
+                                over instances of the word WebViewer.
+                        </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/text-position/config.js" class="colorbox mobile"
+                                           title="Get Text Position Config File">config.js</a>
+                            </p>
+                        </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="custom-display">
+                    <a class="colorbox"
+                           href="samples/display-mode/index.html"
+                           title="Custom Display Mode"  target="_blank">
+                        <div class="thumb display-mode"></div>
+                        <div class="title">Custom Horizontal Display Mode</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to create a custom display mode by overriding display mode functions.
+                                The sample creates a basic horizontal layout.
+                        </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/display-mode/config.js" class="colorbox mobile"
+                                           title="Custom display mode Config File">config.js</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="form-actions">
+                    <a class="colorbox mobile"
+                           href="samples/form-actions/index.html"
+                           title="Form Actions"  target="_blank">
+                        <div class="thumb form-actions"></div>
+                        <div class="title">Form Actions</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample demonstrates the different form actions that are supported by WebViewer.
+                                Actions should be added to fields in the PDF document.
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod" id="offline-library">
+                    <a class="colorbox mobile"
+                           href="samples/offline-library/index.html"
+                           title="Offline Library"  target="_blank">
+                        <div class="thumb offline-library"></div>
+                        <div class="title">Offline Library</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how to use HTML5's application cache with WebViewer's offline mode to download documents and then view them offline.
+                        </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/offline-library/offline-sample.appcache" class="colorbox mobile"
+                                           title="Sample Application Cache Manifest">offline-sample.appcache</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod" id="deckjs">
+                    <a class="colorbox"
+                           href="samples/deckjs/index.html"
+                           title="Deck.js Slideshow Demo"  target="_blank">
+                        <div class="thumb deckjs"></div>
+                        <div class="title">Deck.js Slideshow Demo</div>
+                    </a>
+                    <div class="desc">
+                            <p>
+                                This sample shows how the HTML5 WebViewer can be integrated with the <a href="https://github.com/imakewebthings/deck.js" target="_blank">deck.js</a> project
+                                to create a slideshow from a document. Please note that there were some customizations done to the scale extension.
+                            </p>
+                            <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod" id="accessible">
+                    <a class="colorbox mobile"
+                           href="samples/accessible/index.html#d=../../GettingStarted.xod"
+                           title="Accessible Viewer Demo"  target="_blank">
+                        <div class="thumb accessible"></div>
+                        <div class="title">Accessible Viewer Demo</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how page text can be loaded to create a basic accessible document viewer.  Only the document's text is displayed,
+                                with headings for each page.
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="i18n">
+                    <a class="colorbox"
+                           href="samples/i18n/index.html"
+                           title="Internationalization Support"  target="_blank">
+                        <div class="thumb i18n"></div>
+                        <div class="title">Internationalization Support</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how the HTML5 WebViewer supports internationalization.
+                                Additional custom translations can be easily added by copying and modifying the English translation json file.
+                        </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/i18n/config.js" class="colorbox mobile"
+                                           title="Internationalization support Config File">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod" id="flipbook">
+                    <a class="colorbox"
+                           href="samples/flipbook/index.html"
+                           title="Flipbook Demo"  target="_blank">
+                        <div class="thumb flipbook"></div>
+                        <div class="title">Flipbook Demo</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how the HTML5 WebViewer can be modified to display documents in a flipbook style.
+                                Place your mouse near a page corner and then click and drag to change pages.  Note that this sample
+                                shows how the core document viewing component can be used outside of WebViewer.js and any UI controls
+                                would have to be implemented independently.
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="annotations">
+                    <a class="colorbox mobile"
+                           href="samples/annotation/index.html"
+                           title="Annotation Support"  target="_blank">
+                        <div class="thumb annotation"></div>
+                        <div class="title">Annotation Support</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows the HTML5 WebViewer's out-of-the-box support for annotations.
+                                WebViewer supports the creation of many annotation types, such as: line, ellipse, text highlight and underline (among others).
+                            <br/>
+                            By default, all WebViewer annotations are compatible with PDF annotations and vice versa (WebViewer annotations can be imported from and exported to the XFDF XML format).
+                        </p>
+                        <hr/>
+                        </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="custom-annotations">
+                    <a class="colorbox" target="_blank"
+                           title="Custom Annotations"
+                           href="samples/custom-annotations/index.html">
+                        <div class="thumb custom-annotaton"></div>
+                        <div class="title">Custom Annotations</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how the HTML5 WebViewer can be extended with custom annotations and tools via the Annotation Framework.
+                                A custom tool is added to the annotation panel to create a diamond annotation.
+                                The sample source file diamond.js includes code that defines the appearance of the annotation, as well as the selection box and control handle behaviors.
+                            </p>
+
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/custom-annotations/diamond.js" class="colorbox mobile"
+                                           title="Example of loading a custom annotation script to ReaderControl">diamond.js</a>
+                            </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="forms">
+                    <a class="colorbox mobile" href="samples/forms/index.html"
+                           title="Form support" target="_blank">
+                        <div class="thumb forms"></div>
+                        <div class="title">Form Support</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how the HTML5 WebViewer supports PDF form actions.
+                                Form submit actions can be directly to a server from the WebViewer.
+                                To see it live, fill in some data in the text boxes and click submit at the bottom of the document.
+                                <br/>
+                                Compare with the original file: <a href="samples/files/form1.pdf" target="_blank">form1.pdf</a>
+                            </p>
+                            <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod pdf" id="customization">
+                    <a class="colorbox" href="samples/customization/index.html"
+                           target="_blank" title="UI Customization">
+                        <div class="thumb customize"></div>
+                        <div class="title">Customization: UI Controls</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample show how the HTML5 WebViewer can be customized in a clean and simple manner.
+                                Through an external configuration script that can be loaded at run-time, the WebViewer's theme, branding, or even default behaviors can be changed.
+                        </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/customization/config.js" class="colorbox mobile"
+                                           title="UI Customization Config file">config.js</a>
+                        </p>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod" id="encryption">
+                    <a class="colorbox" href="samples/encryption/desktop.html"
+                           title="Encryption Support: Client-side Password Protection. The sample password is 'foobar'." target="_blank">
+                        <div class="thumb encrypt"></div>
+                        <div class="title">Encryption Support</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows the HTML5 WebViewer loading an encrypted XOD document.
+                                This WebViewer loads a
+                            <a href="samples/encryption/config.js" class="colorbox"
+                                   title="Custom configuration file to enable client-side XOD document decryption."
+                                   target="_blank"
+                                   >custom configuration file</a> that includes a handler for decrypting encrypted XOD files.
+                                <br/>
+                                To create an encrypted document, convert the XOD document with the parameter "--xod_encrypt_password". <br/>
+                                e.g. docpub test.pdf -f xod --xod_encrypt_password mypassword<br/>
+                                Download the XOD document loaded by the viewer, see that the content is encrypted: <a href="samples/files/tiger-encrypted.xod" target="_blank">encrypted.xod</a>
+                                <br/>
+                                The password for this sample is <b>foobar</b>.
+                                <br/>
+                            </p>
+                            <hr/>
+                            <p>
+                                Source: <a href="config.html#file=samples/encryption/config.js" class="colorbox mobile"
+                                           title="Encryption Support Config File">config.js</a>
+                                <br/>
+                                <i class="tip">Tip: for added security, obfuscate the code for the decryption handler. Please note that because this is client-side decryption, there is no way to ensure 100% security.</i>
+                            </p>
+                        </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="project xod" id="offline">
+                    <a class="colorbox mobile" href="samples/offline/index.html"
+                           target="_blank"  title="Offline Mode Support">
+                        <div class="thumb offline"></div>
+                        <div class="title">Offline Mode</div>
+                    </a>
+                    <div class="desc">
+                        <p>
+                            This sample shows how a document can downloaded for offline viewing.
+                                Once the download button is clicked, the xod document will be downloaded and saved within the browser's internal database.
+                                Offline viewing mode can be turned on once the xod document has finished downloading.
+                            <br/>
+                        </p>
+                        <hr/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div id="native"  class="tab xod">
+                <h2 >Native Application Integration</h2>
+
+                <div class="project xod" id="cordova">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Cordova Setup Instructions"
+                           href="samples/cordova/README.txt">
+                        <div class="thumb cordova"></div>
+                        <div class="title">Cordova Integration</div>
+                    </a>
+
+                    <div class="desc">
+                        <p>
+                            This sample shows how to integrate the HTML5 WebViewer with Cordova (PhoneGap) to allow you to create native applications.
+                                You can find instructions on how to set it up in the README.txt file in the sample folder.
+                        </p>
+                        <hr/>
+                        <p>
+                            Cordova Resources:
+                            <a href="//cordova.apache.org/docs/en/5.1.1/" target="_blank">Documentation</a>
+                            <br/>
+                        </p>
+
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod" id="winrt">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Screenshot of the WebViewer Running in a Native WinRT Application"
+                           href="assets/images/winrt_app.png">
+                        <div class="thumb winrt"></div>
+                        <div class="title">Native WinRT Application</div>
+                    </a>
+
+                    <div class="desc">
+                        <p>
+                            This sample shows how to integrate the HTML5 WebViewer in a native WinRT application.
+                                The WebViewer is packaged directly in the WinRT application, where it can be loaded by the WebView control.
+                                Using a custom JavaScript part retriever, the WebViewer is able to load XOD documents from the local file system.
+                        </p>
+                        <hr/>
+                        <p>
+                            WinRT Resources:
+                            <a href="//dev.windows.com/en-us/" target="_blank">Getting started</a>
+                            <br/>
+                        </p>
+
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod" id="ios">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Screenshot of the WebViewer Running in a Native iOS Application"
+                           href="assets/images/ios_app.png">
+                        <div class="thumb ios"></div>
+                        <div class="title">Native iOS Application</div>
+                    </a>
+
+                    <div class="desc">
+                        <p>
+                            This sample shows how to integrate the HTML5 WebViewer in a native iOS application.
+                                The WebViewer is packaged directly in the iOS application, where it can be loaded by the UIWebView control.
+                                Using a custom JavaScript part retriever, the WebViewer is able to communicate with Objective-C and load XOD documents from the local file system.
+                        </p>
+                        <hr/>
+                        <p>
+                            iOS Resources:
+                            <a href="//developer.apple.com/resources/" target="_blank">Getting started</a>
+                            <br/>
+                        </p>
+
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="project xod" id="android">
+                    <a class="colorbox mobile" target="_blank"
+                           title="Screenshot of the WebViewer Running in a Native Android Application"
+                           href="assets/images/android_app.png">
+                        <div class="thumb android"></div>
+                        <div class="title">Native Android Application</div>
+                    </a>
+
+                    <div class="desc">
+                        <p>
+                            This sample shows how to integrate WebViewer.js in a native Android application.
+                                The WebViewer is packaged directly as an asset in an Android application, where it can be loaded by the WebView control.
+                                Using a custom ContentProvider, the WebViewer is able to load XOD documents from the local file system.
+                        </p>
+                        <hr/>
+                        <p>
+                            Android Resources:
+                            <a href="//developer.android.com/about/start.html" target="_blank">Getting started</a>
+                            <br/>
+                            <i class="tip">
+                                Tip: create a new Android project from existing sources from the WebViewer/samples/android folder.
+                            </i>
+                        </p>
+
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer">
+        <div class="wrapper top-line">
+            <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+        </div>
+
+    </div>
+</body>
+</html>

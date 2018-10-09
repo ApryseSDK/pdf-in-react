@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PDFTron WebViewer User Guide</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!-- include the following meta tags for mobile devices -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+            html, body{
+                margin: 0;
+                height:100%;
+				overflow:hidden;
+            }
+            #viewer{
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <script src="../jquery-3.2.1.min.js" type="text/javascript"></script>
+        <script src="../lib/WebViewer.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $(function() {
+                //=========================================
+                //1: Using WebViewer without JQuery UI
+                //=========================================
+
+                var type = "html5,html5Mobile";
+                if(getQuery('type')){
+                    type = getQuery('type');
+                }
+                var d = getQuery('d');
+                var did = getQuery('did');
+                var viewerElement = document.getElementById('viewer');
+                myWebViewer = new PDFTron.WebViewer({
+                    type: type,
+                    path: '../lib',                           //URL path to the WebViewer root folder
+                    initialDoc : "WebViewer_User_Guide.xod",
+                    enableAnnotations: false,
+                    streaming : false                   //set streaming to 'true' if your .xod server doesn't acknowledge byte-ranges
+                }, viewerElement);
+
+                $('#webViewerVersion').html(myWebViewer.version);
+
+                //events must but bound using .bind, not passed as options
+                $(viewerElement).bind('ready', function(event){
+                    //webviewer is ready
+                    //initialize GUI settings here, such as setShowSideWindow
+                    $('#viewerType').html(myWebViewer.selectedType);
+
+                    if(myWebViewer.selectedType  == "html5Mobile"){
+                        //the mobile viewer is optimized for cross-device support
+                        //supports only a subset of features in WebViewer.js
+                        $('.no-mobile').hide();
+                        if(!myWebViewer.isMobileDevice()){
+                            $('#notes').append('<div style="color:red">Mobile device not detected.</div>')
+                            .append('<div>Note: On mobile devices, this viewer is optimized to be displayed in the full device screen and is not compatible with WebViewer controls. \n\
+                                    For the best mobile viewing experience, it is recommended that UI customizations be done directly on the mobile viewer.</div>');
+                        }
+                    }else{
+                        $('.no-mobile').show();
+                    }
+
+                    if(myWebViewer.selectedType  == "html5"){
+                        $('#searchMode option[value!=None]').hide();
+                        if(!myWebViewer.options.enableAnnotations){
+                            $('#toolModeValue option[value*="Annotation"]').hide();
+                        }
+                    }
+                });
+
+                //bind to change events
+                $(viewerElement).bind('displayModeChanged zoomChanged pageChanged toolModeChanged', function(event, data){
+                    switch(event.type){
+                        case "displayModeChanged":
+                            $("#layoutModeValue").val(myWebViewer.getLayoutMode());
+                            break;
+                        case "zoomChanged":
+                            $("#zoomLevelValue").val(myWebViewer.getZoomLevel());
+                            break;
+                        case "pageChanged":
+                            $("#pageNumberValue").val( myWebViewer.getCurrentPageNumber());
+                            break;
+                        case "toolModeChanged":
+                            $("#toolModeValue").val(myWebViewer.getToolMode());
+                            break;
+                    }
+                });
+                //bind to document loaded devent
+                $(viewerElement).bind('documentLoaded', function(event){
+                    //document loaded
+                    //initialize GUI options here, such as page number, zoom level
+                    $("#pageNumberValue").val( myWebViewer.getCurrentPageNumber());
+                    $("#pageCountValue").text(myWebViewer.getPageCount());
+                    if(myWebViewer.selectedType  != "html5Mobile"){
+                        $("#zoomLevelValue").val(myWebViewer.getZoomLevel());
+                        $("#layoutModeValue").val(myWebViewer.getLayoutMode());
+                        $("#toolModeValue").val(myWebViewer.getToolMode());
+                    }
+                });
+
+            });
+            var getQuery = function gqv(a){
+                var b=window.location.search.substring(1);
+                var c=b.split("&");
+                for(var d=0;d<c.length;d++){
+                    var e=c[d].split("=");
+                    if(e[0]==a){
+                        return e[1];
+                    }
+                }
+                return null;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="viewer"></div>
+    </body>
+</html>

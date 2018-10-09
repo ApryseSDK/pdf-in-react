@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="./jquery-3.2.1.min.js"></script>
+        <script src="lib/html5/ControlUtils.js"></script>
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+        <script>
+            $(document).ready(function() {
+                var queryParams = window.ControlUtils.getQueryStringMap(true);
+                var file = queryParams.getString('file');
+                // We use always here because there will sometimes be a parser error on the response
+                // This means that we cannot use the success callback so we check for success with
+                // the status code.
+                $.get( file, function(response) {
+                    // We need to escape these characters otherwise divs etc. will just be rendered in
+                    // the middle of the code!
+                    $('#result').html(response.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+                }).always(function(response) {
+                    if(response.status === 200){
+                        $('#result').html(response.responseText.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+                    }
+                });
+            });
+        </script>
+        <style>
+            .prettyprint{
+                font-size: smaller;
+            }
+        </style>
+    </head>
+    <body>
+        <pre class="prettyprint lang-js" id = 'result'>
+        </pre>
+    </body>
+</html>

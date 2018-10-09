@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Flipbook</title>
+        <script src="../../jquery-3.2.1.min.js"></script>
+        <script src="../../lib/html5/CoreControls.js"></script>
+        <script src="../../lib/html5/ControlUtils.js"></script>
+        <script src="../../lib/html5/external/turn.js"></script>
+        <script src="flipbook.js"></script>
+        <style type="text/css">
+
+            body {
+                width:100%;
+                height:100%;
+                overflow:hidden;
+                margin:0;
+                background:#ccc;
+            }
+            html {
+                width:100%;
+                height:100%;
+                overflow:hidden;
+            }
+            div{
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                cursor: default;
+            }
+
+            #viewer{
+                visibility: hidden;
+                margin-left: auto;
+                margin-right: auto;
+
+            }
+            #viewer div.turn-page{
+                background-color:#ccc;
+                background-size:100% 100%;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="docpad"></div>
+        <div id="viewer">
+        </div>
+    </body>
+</html>

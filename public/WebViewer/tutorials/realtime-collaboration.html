@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="../assets/style.css">
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+		<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+
+	</head>
+	<body>
+		<div id="header">
+			<div class="wrapper" style="text-align:center">
+				<h1>PDFTron WebViewer</h1>
+			</div>
+		</div>
+		<div class="sub-header">
+			<ul class="menu" >
+				<li><a href="../index.html">Overview</a></li>
+				<li><a href="../whatsnew.html">What's New</a></li>
+				<li><a href="../documentation.html">Documentation</a></li>
+				<li><a href="../samples.html">Samples</a></li>
+				<li><a href="../tutorials.html" class="active">Tutorials</a></li>
+			</ul>
+		</div>
+		<div id="content">
+			<div class="wrapper">
+				<h2><a href="../tutorials.html">Tutorials</a></h2>
+				<div class="project">
+					<h3>Setting up realtime collaboration with WebViewer and Firebase</h3>
+					<p>WebViewer contains APIs that allow you to export/import annotations from/to a document. Using those APIs and a server, you can set up realtime collaboration easily. This tutorial provides a simple example that covers:</p>
+					<ul>
+						<li>Authenticating users.</li>
+						<li>Exporting/Importing annotation data to/from server.</li>
+						<li>Setting the user permissions of each annotation on both server and client side.</li>
+					</ul>
+
+					<h4>Initial setup - HTML</h4>
+          <ol>
+            <li>Download <a href="https://www.pdftron.com/webviewer/download.html">WebViewer SDK</a> and unzip the package.</li>
+            <li>Copy <code>lib/</code> folder to a location on your web server.</li>
+            <li>Create an HTML page.</li>
+            <li>
+            	Add the following scripts to the <code>&lt;head&gt;</code> of the HTML page. WebViewer.js depends on jQuery so it must be included. Instead of including WebViewer.js you could include WebViewer.min.js which is a minified version of the file.
+							<pre>
+								<code class="xml">
+&lt;script src=&quot;jquery-3.2.1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;lib/WebViewer.js&quot;&gt;&lt;/script&gt;
+								</code>
+							</pre>
+            </li>
+            <li>
+            	Add necessary scripts server methods. In this tutorial, we are going to include Firebase library and a separate file named <code>server.js</code>
+            	<pre>
+								<code class="xml">
+&lt;script src=&quot;https://www.gstatic.com/firebasejs/3.5.3/firebase.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;server.js&quot;&gt;&lt;/script&gt;
+								</code>
+							</pre>
+						</li>
+						<li>
+							Add a script to initiate and use WebViewer.
+							<pre>
+								<code class="xml">
+&lt;script src=&quot;main.js&quot;&gt;&lt;/script&gt;
+								</code>
+							</pre>
+						</li>
+						<li>
+							Add a stylesheet to style the WebViewer element and some other user feedback elements.
+							<pre>
+								<code class="xml">
+&lt;link rel=&quot;stylesheet&quot; href=&quot;index.css&quot;&gt;
+								</code>
+							</pre>
+						</li>
+						<li>
+							Create a <code>&lt;div&gt;</code> tag in the HTML <code>&lt;body&gt;</code> and give it an id. This will be the container for the WebViewer.
+							<pre>
+								<code class="xml">
+&lt;div id=&quot;viewer&quot;&gt;&lt;/div&gt;
+								</code>
+							</pre>
+          	</li>
+          	<li>
+							Create few more <code>&lt;div&gt;</code> tags in the HTML <code>&lt;body&gt;</code> as the following. These will be the used for a user to setup a name, or to show a returning user's name.
+							<pre>
+								<code class="xml">
+&lt;div class="popup returning-user"&gt;
+  &lt;div class="greeting"&gt;Welcome back&lt;/div&gt;
+  &lt;div class="name"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="popup new-user"&gt;
+  &lt;div class="greeting"&gt;Welcome! Tell us your name :)&lt;/div&gt;
+  &lt;input class="name" autofocus /&gt;
+  &lt;div class="button"&gt;Start&lt;/div&gt;
+&lt;/div&gt;
+								</code>
+							</pre>
+          	</li>
+          </ol>
+
+					<h4>Server - JavaScript</h4>
+					<p>In realtime collaboration, a server will merely act as an online database that triggers events upon data creation/modification/deletion. As long as the above requirement is met, your server can be built in any language and stack of your choice. For the simplicity of this tutorial, we will be using <a href="https://firebase.google.com/">Firebase</a>.</p>
+					<ol>
+						<li>Go to the <a href="https://console.firebase.google.com/">Firebase Console</a>, login and create a project.</li>
+						<li>Click "Add Firebase to your Web App" and copy the whole code for "Initializing Firebase". If <code>storageBucket</code> is empty, close the popup and try again (that's a known bug from Firebase).</li>
+						<li>Create a JavaScript file and name it <code>server.js</code>.</li>
+						<li>Paste the code that you have copied from Firebase. (Note that you should remove the script tags)</li>
+						<li>
+							Store the <a href="https://firebase.google.com/docs/reference/js/firebase.database.Reference">firebase.database.Reference</a>s for annotations and users. We will use these to create/update/delete data, and listen to data change events as well.
+							<pre>
+								<code class="javascript">
+window.Server = function() {
+  var config = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://PROJECT_ID.firebaseio.com",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID"
+  };
+  firebase.initializeApp(config);
+
+  this.annotationsRef = firebase.database().ref().child('annotations');
+  this.authorsRef = firebase.database().ref().child('authors');
+};
+								</code>
+							</pre>
+						</li>
+						<li>
+							Create a custom bind function for authorization and data using <a href="https://firebase.google.com/docs/reference/js/firebase.auth.Auth#onAuthStateChanged">firebase.auth.Auth#onAuthStateChanged</a> and <a href="https://firebase.google.com/docs/reference/js/firebase.database.Reference#on">firebase.database.Reference#on</a>.
+							<pre>
+								<code class="javascript">
+Server.prototype.bind = function(action, callbackFunction) {
+  switch(action) {
+    case 'onAuthStateChanged':
+      firebase.auth().onAuthStateChanged(callbackFunction);
+      break;
+    case 'onAnnotationCreated':
+      this.annotationsRef.on('child_added', callbackFunction);
+      break;
+    case 'onAnnotationUpdated':
+      this.annotationsRef.on('child_changed', callbackFunction);
+      break;
+    case 'onAnnotationDeleted':
+      this.annotationsRef.on('child_removed', callbackFunction);
+      break;
+    default:
+      console.error('The action is not defined.');
+      break;
+  }
+};
+								</code>
+							</pre>
+						</li>
+						<li>
+							Define a method to check if author exists in the database. We will use <a href="https://firebase.google.com/docs/reference/js/firebase.database.Reference#once">firebase.database.Reference#once</a> and <a href="https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#hasChild">firebase.database.DataSnapshot#hasChild</a> to do so.
+							<pre>
+								<code class="javascript">
+Server.prototype.checkAuthor = function(authorId, openReturningAuthorPopup, openNewAuthorPopup) {
+  this.authorsRef.once('value', function(authors) {
+    if (authors.hasChild(authorId)) {
+      this.authorsRef.child(authorId).once('value', function(author) {
+        openReturningAuthorPopup(author.val().authorName);
+      });
+    } else {
+      openNewAuthorPopup();
+    }
+  }.bind(this));
+};
+								</code>
+							</pre>
+						</li>
+						<li>
+							Define a sign-in method. In this tutorial, we will use <a href="https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInAnonymously">firebase.auth.Auth#signInAnonymously</a>.
+							<pre>
+								<code class="javascript">
+Server.prototype.signInAnonymously = function() {
+  firebase.auth().signInAnonymously().catch(function(error) {
+    if (error.code === 'auth/operation-not-allowed') {
+      alert('You must enable Anonymous auth in the Firebase Console.');
+    } else {
+      console.error(error);
+    }
+  });
+};
+								</code>
+							</pre>
+						</li>
+            <li>
+              From the Firebase console click the "Authentication" button on the left panel and then click the "Sign-in Method" tab, just to the right of "Users". From this page click the "Anonymous" button and choose to enable Anonymous login.
+            </li>
+						<li>
+							Define data-write methods using <a href="https://firebase.google.com/docs/reference/js/firebase.database.Reference#set">firebase.database.Reference#set</a> and <a href="https://firebase.google.com/docs/reference/js/firebase.database.Reference#remove">firebase.database.Reference#remove</a>.
+							<pre>
+								<code class="javascript">
+Server.prototype.createAnnotation = function(annotationId, annotationData) {
+  this.annotationsRef.child(annotationId).set(annotationData);
+};
+
+Server.prototype.updateAnnotation = function(annotationId, annotationData) {
+  this.annotationsRef.child(annotationId).set(annotationData);
+};
+
+Server.prototype.deleteAnnotation = function(annotationId) {
+  this.annotationsRef.child(annotationId).remove();
+};
+
+Server.prototype.updateAuthor = function(authorId, authorData) {
+  this.authorsRef.child(authorId).set(authorData);
+};
+								</code>
+							</pre>
+						</li>
+						<li>
+							Last but not least, you should add server-side permission rules for writing data. Although client-side permission checking is supported in WebViewer, every user does have access to each annotation's information (including <code>authorId</code> and <code>authorName</code>). Thus, data-write permission should be regulated in the server as well. In this tutorial, we have used Firebase's <a href="https://firebase.google.com/docs/database/security/">Database Rules</a>. <br/><br/>
+              Copy the JSON below and paste it in your Firebase Console's Database Rules. From the console click the "Database" button on the left panel and then click the "Rules" tab, just to the right of "Data". This will make sure that trying to modify someone else's annotation isn't allowed.
+							<pre>
+								<code class="json">
+{
+  "rules": {
+    ".read": "auth != null",
+
+    "annotations": {
+      "$annotationId": {
+        ".write": "auth.uid === newData.child('authorId').val() || auth.uid === data.child('authorId').val() || auth.uid === newData.child('parentAuthorId').val() || auth.uid === data.child('parentAuthorId').val()"
+      }
+    },
+
+    "authors": {
+      "$authorId": {
+        ".write": "auth.uid === $authorId"
+      }
+    }
+  }
+}
+								</code>
+							</pre>
+						</li>
+					</ol>
+
+					<h4>Client - JavaScript</h4>
+					<ol>
+            <li>
+              Create a JavaScript file and name it <code>main.js</code>.
+            </li>
+						<li>
+							Instantiate WebViewer on a DOM element, making sure to wrap this code and any further code inside <code>$(document).ready()</code>. Initial document can be any PDF or XOD file.
+							<pre>
+								<code class="javascript">
+$(document).ready(function() {
+  var viewerElement = document.getElementById('viewer');
+  var myWebViewer = new PDFTron.WebViewer({
+    type: "html5",
+    path: "lib",
+    initialDoc: "MY_INITIAL_DOC.pdf",
+    documentId: "unique-id-for-this-document",
+    enableAnnotations: true,
+  }, viewerElement);
+
+});
+								</code>
+							</pre>
+						</li>
+						<li>
+							Create the server.
+							<pre>
+								<code class="javascript">
+var server = new Server();
+								</code>
+							</pre>
+						</li>
+						<li>
+							Bind a callback function to <a href="../lib/html5/doc/symbols/CoreControls.DocumentViewer.html#event:documentLoaded">DocumentViewer.documentLoaded event</a>. You will then be able to get <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html">annotationManager</a> and access its methods.
+							<pre>
+								<code class="javascript">
+$(viewerElement).on('documentLoaded', function() {
+  // show the notes panel by default
+  myWebViewer.getInstance().showNotesPanel(true);
+
+  var annotationManager = myWebViewer.getInstance().docViewer.getAnnotationManager();
+  // Code in later steps will come here...
+});
+								</code>
+							</pre>
+						</li>
+						<li>
+							Inside the documentLoaded callback, bind another callback function to server's <code>onAuthStateChanged</code> event that is defined in <code>server.js</code>. A <a href="https://firebase.google.com/docs/reference/js/firebase.User">firebase.User</a> object will be passed as a parameter.
+							<br /><br />
+							<ol>
+								<li>If the user is not logged in we'll call the sign-in method that we defined in <code>server.js</code>.</li>
+								<li>If the user is logged in, we'll store their <code>uid</code> in the <code>authorId</code> variable, which will be used for client-side annotation permission checks.</li>
+								<li>We call <code>server.checkAuthor</code> with parameters <code>authorId</code>, <code>openReturningUserPopup</code> function and <code>openNewUserPopup</code> function. These functions will be discussed in next steps.</li>
+								<li>Then, we will send author information to the server and bind callback functions to annotation events. Details of the callback functions will be discussed in next steps.</li>
+							</ol>
+							<pre>
+								<code class="javascript">
+var authorId = null;
+
+server.bind('onAuthStateChanged', function(user) {
+  // User is logged in
+  if (user) {
+    // Using uid property from Firebase Database as an author id
+    // It is also used as a reference for server-side permission
+    authorId = user.uid;
+    // Check if user exists, and call appropriate callback functions
+    server.checkAuthor(authorId, openReturningAuthorPopup, openNewAuthorPopup);
+    // Bind server-side data events to callback functions
+    // When loaded for the first time, onAnnotationCreated event will be triggered for all database entries
+    server.bind('onAnnotationCreated', onAnnotationCreated);
+    server.bind('onAnnotationUpdated', onAnnotationUpdated);
+    server.bind('onAnnotationDeleted', onAnnotationDeleted);
+  }
+  // User is not logged in
+  else {
+    // Login
+    server.signInAnonymously();
+  }
+});
+								</code>
+							</pre>
+						</li>
+						<li>
+							Define callback functions for <code>annotationCreated</code>, <code>annotationUpdated</code> and <code>server.annotationDeleted</code> events. A data object will be passed as a parameter. For more information, refer to <a href="https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot">firebase.database.DataSnapshot</a>.
+							<br /><br />
+							<ol>
+								<li><code>openReturningAuthorPopup</code> is a callback function triggered when author data is found in the database. It will receive authorName as a parameter, and open a popup with the authorName as a visual feedback.</li>
+								<li><code>openNewAuthorPopup</code> is a callback function triggered when author data is not found. Then we will open a popup for a new author to setup an author name.</li>
+								<li><code>updateAuthor</code> is a function which will set author name in both client and server using <a href="https://www.pdftron.com/webviewer/demo/lib/html5/doc/symbols/CoreControls.AnnotationManager.html#setCurrentUser">annotationManager.setCurrentUser</a> and <code>server.updateAuthor</code>, respectively.</li>
+							</ol>
+							<pre>
+								<code class="javascript">
+function openReturningAuthorPopup(authorName) {
+  annotationManager.setCurrentUser(authorName);
+  $('.returning-author .name').html(authorName);
+  $('.returning-author').css('display', 'block').click(function(e) {
+    e.stopPropagation();
+  });
+  $('.popup-container').click(function() {
+    $('.popup-container').css('display', 'none');
+  });
+  $('.popup-container').keypress(function(e) {
+    if (e.which === 13) {
+      $('.popup-container').css('display', 'none');
+    }
+  });
+}
+
+function openNewAuthorPopup() {
+  // Open popup for a new author
+  $('.new-author').css('display', 'block');
+  $('.new-author .button').click(function() {
+    var authorName = $('.new-author .name').get(0).value.trim();
+    if (authorName) {
+      updateAuthor(authorName);
+    }
+  });
+  $('.popup-container').keypress(function(e) {
+    var authorName = $('.new-author .name').get(0).value.trim();
+    if (e.which === 13 && authorName) {
+      updateAuthor(authorName);
+    }
+  });
+}
+
+function updateAuthor(authorName) {
+  // The author name will be used for both WebViewer and annotations in PDF
+  annotationManager.setCurrentUser(authorName);
+  // Create/update author information in the server
+  server.updateAuthor(authorId, { authorName: authorName });
+  $('.popup-container').css('display', 'none');
+}
+								</code>
+							</pre>
+						</li>
+						<li>
+							Define callback functions for <code>annotationCreated</code>, <code>annotationUpdated</code> and <code>server.annotationDeleted</code> events. A data object will be passed as a parameter. For more information, refer to <a href="https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot">firebase.database.DataSnapshot</a>.
+							<br /><br />
+							<ol>
+								<li><code>onAnnotationCreated</code> and <code>onAnnotationUpdated</code> have the exact same behavior in this tutorial. They will use <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html#importAnnotCommand">annotationManager.importAnnotCommand</a> to update the viewer with the xfdf change.</li>
+								<li>We also set a custom field <code>authorId</code> for the updated annotation to control client-side permission of the created/updated annotation.</li>
+								<li><code>onAnnotationDelete</code> creates a delete command string from the annotation's id and is simply able to call importAnnotCommand on it.
+							</ol>
+							<pre>
+								<code class="javascript">
+function onAnnotationCreated(data) {
+  // data.val() returns the value of server data in any type. In this case, it
+  // would be an object with properties authorId and xfdf.
+  var annotation = annotationManager.importAnnotCommand(data.val().xfdf)[0];
+  annotation.authorId = data.val().authorId;
+  annotationManager.redrawAnnotation(annotation);
+  myWebViewer.getInstance().fireEvent('updateAnnotationPermission', [annotation]);
+}
+
+function onAnnotationUpdated(data) {
+  var annotation = annotationManager.importAnnotCommand(data.val().xfdf)[0];
+  annotation.authorId = data.val().authorId;
+  annotationManager.redrawAnnotation(annotation);
+}
+
+function onAnnotationDeleted(data) {
+  // data.key would return annotationId since our server method is designed as
+  // annotationsRef.child(annotationId).set(annotationData)
+  var command = '&lt;delete&gt;&lt;id&gt;' + data.key + '&lt;/id&gt;&lt;/delete&gt;';
+  annotationManager.importAnnotCommand(command);
+}
+								</code>
+							</pre>
+						</li>
+						<li>
+							After server callback functions are bound, we'll also bind a function to <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html#event:annotationChanged">annotationManager.annotationChanged</a> event.
+							<br /><br />
+							<ol>
+								<li>First parameter, <code>e</code>, has a property <code>imported</code> that is set to <code>true</code> by default for annotations internal to the document and annotations added by <code>importAnnotCommand</code>.</li>
+								<li>Then we iterate through the annotations that are changed, which is passed as the second parameter.</li>
+								<li>Third parameter, <code>type</code>, defines which action it was. In this tutorial, we'll have the same behavior for both <code>add</code> and <code>modify</code> action types.</li>
+								<li>When annotations are added and modified, we will call <code>server.createAnnotation</code> or <code>server.updateAnnotation</code> which needs four variables: <code>annotationId</code>, <code>authorId</code>, <code>parentAuthorId</code> and <code>xfdf</code>.</li>
+								<li><code>annotationId</code> can be retrieved from <a href="../lib/html5/doc/symbols/Annotations.Annotation.html#Id">annotation.Id</a>.</li>
+								<li><code>authorId</code> was saved as a reference when user logged in.</li>
+								<li><code>parentAuthorId</code> refers to the parent annotation's author id, if any. This will be used to distinguish replies, and will be referenced in server-side permission. Thus, we retrieve <code>authorId</code> of the parent annotation by using annotation.InReplyTo, which returns the annotation id of the parent annotation.</li>
+								<li><code>xfdf</code> can be retrieved using <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html#getAnnotCommand">annotationManager.getAnnotCommand</a>. It will get an XML string specifying the added, modified and deleted annotations, which can be used to import the annotation using <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html#importAnnotCommand">annotationManager.importAnnotCommand</a> in server data callback functions.</li>
+							</ol>
+							<pre>
+								<code class="javascript">
+annotationManager.on('annotationChanged', function(e, annotations, type) {
+  if (e.imported) {
+    return;
+  }
+  annotations.forEach(function(annotation) {
+    if (type === 'add') {
+      var xfdf = annotationManager.getAnnotCommand();
+      var parentAuthorId = null;
+      if (annotation.InReplyTo) {
+        var parentAuthorId = annotationManager.getAnnotationById(annotation.InReplyTo).authorId || 'default';
+      }
+      server.createAnnotation(annotation.Id, {
+        authorId: authorId,
+        parentAuthorId: parentAuthorId,
+        xfdf: xfdf
+      });
+    } else if (type === 'modify'){
+      var xfdf = annotationManager.getAnnotCommand();
+      var parentAuthorId = null;
+      if (annotation.InReplyTo) {
+        var parentAuthorId = annotationManager.getAnnotationById(annotation.InReplyTo).authorId || 'default';
+      }
+      server.updateAnnotation(annotation.Id, {
+        authorId: authorId,
+        parentAuthorId: parentAuthorId,
+        xfdf: xfdf
+      });
+    } else if (type === 'delete') {
+      server.deleteAnnotation(annotation.Id);
+    }
+  });
+});
+								</code>
+							</pre>
+						</li>
+						<li>
+							Lastly, we will overwrite the client-side permission checking function using <a href="../lib/html5/doc/symbols/CoreControls.AnnotationManager.html#setPermissionCheckCallback">annotationManager.setPermissionCheckCallback</a>. The default is set to compare the authorName. Instead, we will compare authorId created from the server.
+							<pre>
+								<code class="javascript">
+annotationManager.setPermissionCheckCallback(function(author, annotation) {
+  return annotation.authorId === authorId;
+});
+								</code>
+							</pre>
+						</li>
+					</ol>
+					<h4>Styling - CSS</h4>
+					<p>Width and height of the WebViewer element must be specified with css. Styling for author name popup is also added in this tutorial. Create a file named index.css with the following content.</p>
+					<pre>
+						<code class="css">
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+#viewer {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.popup-container {
+  width: 100%;
+  height: 100%;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.popup {
+  display: none;
+
+  padding: 30px;
+  border-radius: 10px;
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 1);
+  font-family: Verdana;
+  text-align: center;
+  line-height: 2em;
+}
+
+.greeting {
+  margin-bottom: 10px;
+}
+
+.name {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.new-author .name {
+  float: left;
+
+  width: 170px;
+  height: 50px;
+  padding: 0 20px;
+  border: 1px black;
+  border-style: solid none solid solid;
+  border-radius: 5px 0 0 5px;
+
+  outline: none;
+}
+
+.new-author .button {
+  float: right;
+
+  height: 50px;
+  padding: 0 20px;
+  border: 1px solid black;
+  border-radius: 0 5px 5px 0;
+
+  background: white;
+  cursor: pointer;
+  line-height: 50px;
+}
+						</code>
+					</pre>
+
+					<h4>Conclusion</h4>
+					<p>At this point you should be able to have multiple people access the HTML page from your server and add/modify/delete annotations in real time. To test it out yourself you could try opening it in multiple browsers or in an incognito window to simulate multiple users.</p>
+				</div>
+			</div>
+		</div>
+		<div id="footer">
+			<div class="wrapper top-line">
+				<a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+			</div>
+		</div>
+	</body>
+</html>

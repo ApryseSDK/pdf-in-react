@@ -1,0 +1,17 @@
+
+.glyphicons:before {
+    color: theme_color !important;
+}
+
+.glyphicons:hover:before, .glyphicons.active:before {
+    color: theme_color !important;
+}
+
+.glyphicons.select.active{
+   color: theme_highlight_color !important;
+}
+
+.toggleControl span.active {
+  color: theme_active_color !important;
+}
+

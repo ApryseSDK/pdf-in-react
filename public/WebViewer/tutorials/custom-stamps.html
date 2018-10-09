@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../assets/style.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+    </head>
+    <body>
+        <div id="header">
+            <div class="wrapper" style="text-align:center">
+                <h1>PDFTron WebViewer</h1>
+            </div>
+        </div>
+        <div class="sub-header  ">
+            <ul class="menu" >
+                <li><a href="../index.html">Overview</a></li>
+                <li><a href="../whatsnew.html">What's New</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../samples.html">Samples</a></li>
+                <li><a href="../tutorials.html" class="active">Tutorials</a></li>
+            </ul>
+        </div>
+        <div id="content">
+
+            <div class="wrapper">
+                <h2><a href="../tutorials.html">Tutorials</a></h2>
+                <div class="project">
+                    <h3>Creating custom stamp annotations</h3>
+
+                    <p>
+                        WebViewer allows you to programmatically create stamp annotations from an image as a URL or a data URI.
+                    </p>
+
+                    <p>
+                        First let's create the stamp annotation:
+                    </p>
+
+                    <pre>
+                        <code class="javascript">
+var stampAnnot = new Annotations.StampAnnotation();
+                        </code>
+                    </pre>
+
+                    <p>
+                        By itself this won't do much so we need to set some properties so that it can be placed inside a document.
+                        To generate data URIs you could use an image to data URI converter online.
+                    </p>
+
+                    <pre>
+                        <code class="javascript">
+stampAnnot.PageNumber = 1;
+stampAnnot.X = 100;
+stampAnnot.Y = 250;
+stampAnnot.Width = 275;
+stampAnnot.Height = 40;
+// put your data URI or image path here
+stampAnnot.ImageData = 'data:image/png;base64,iVBOR....';
+                        </code>
+                    </pre>
+
+                    <p>
+                        To actually add the annotation to the document we'll need to wait until the document has loaded and then use
+                        the AnnotationManager.
+                    </p>
+
+                    <pre>
+                        <code class="javascript">
+$(document).on('documentLoaded', function() {
+  var annotManager = readerControl.docViewer.getAnnotationManager();
+
+  var stampAnnot = new Annotations.StampAnnotation();
+  stampAnnot.PageNumber = 1;
+  stampAnnot.X = 100;
+  stampAnnot.Y = 250;
+  stampAnnot.Width = 275;
+  stampAnnot.Height = 40;
+  // put your data URI or image path here
+  stampAnnot.ImageData = 'data:image/png;base64,iVBOR....';
+  stampAnnot.Author = annotManager.getCurrentUser();
+
+  annotManager.addAnnotation(stampAnnot);
+  annotManager.drawAnnotations(stampAnnot.PageNumber);
+});
+                        </code>
+                    </pre>
+
+                    <p>
+                        And now you should see a stamp annotation on your document which you can resize or move around.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="wrapper top-line">
+                <a href="http://www.pdftron.com" target="_blank">&COPY; 2018 PDFTron Systems, Inc.</a>
+            </div>
+        </div>
+    </body>
+</html>

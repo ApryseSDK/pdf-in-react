@@ -1,2 +1,0 @@
-webviewer-ui-beta@0.9.0
-Build date: Fri Aug 03 2018 12:13:56 GMT-0700 (Pacific Daylight Time)

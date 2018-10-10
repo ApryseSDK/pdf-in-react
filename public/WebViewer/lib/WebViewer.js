@@ -1,15 +1,15 @@
 /* global define */
 (function(root, PDFTron) {
   if (typeof exports === 'object' && typeof module === 'object') {
-    module.exports = PDFTron(root.jQuery);
+    module.exports = PDFTron();
   } else if (typeof define === 'function' && define.amd) {
-    define(['jquery'], PDFTron);
+    define(PDFTron);
   } else if (typeof exports === 'object') {
-    exports.PDFTron = PDFTron(root.jQuery);
+    exports.PDFTron = PDFTron();
   } else {
-    root.PDFTron = PDFTron(root.jQuery);
+    root.PDFTron = PDFTron();
   }
-})(typeof self !== 'undefined' ? self : this, function($) {
+})(typeof self !== 'undefined' ? self : this, function() {
   /**
    * The namespace reserved for PDFTron technologies.
    * @namespace PDFTron
@@ -27,6 +27,30 @@
     };
   }
 
+  var Utils = {
+    extend: function() {
+      for (var i = 1; i < arguments.length; i++) {
+        for (var key in arguments[i]) {
+          if (arguments[i].hasOwnProperty(key)) {
+            arguments[0][key] = arguments[i][key];
+          }
+        }
+      }
+      return arguments[0];
+    },
+    createEvent: function(eventName, data) {
+      var event;
+      try {
+        event = new CustomEvent(eventName, { detail: data, bubbles: true, cancelable: true });
+      } catch (e) {
+        event = document.createEvent('Event');
+        event.initEvent(eventName, true, true);
+        event.detail = data;
+      }
+      return event;
+    }
+  };
+
   if (window.PDFNet && !PDFTron.skipPDFNetWebViewerWarning) {
     console.warn('PDFNet.js and WebViewer.js have been included in the same context. See pdftron.com/kb_same_context for an explanation of why this could be an error in your application.');
   }
@@ -37,7 +61,7 @@
    * @class Represents a WebViewer which is a document viewer built using HTML5.
    * @memberOf PDFTron
    * @param {PDFTron.WebViewer.Options} options Options passed to the specific WebViewer.
-   * @param {DOMElement} element The html element that will contain the web viewer (e.g. the <div> element that will be parent of the WebViewer). This can be obtained through document.getElementById(), or through JQuery selector.
+   * @param {DOMElement} element The html element that will contain the web viewer (e.g. the <div> element that will be parent of the WebViewer). This can be obtained through document.getElementById() or similar functions.
    * @return {PDFTron.WebViewer} The instance of the WebViewer class.
    * @example
    * var viewerElement = document.getElementById('viewer');
@@ -55,14 +79,14 @@
       }
     }
 
-    if (options.ui === 'beta') {
-      options.html5Path = './webviewer-ui-beta/index.html';
-      options.html5MobilePath = './webviewer-ui-beta/index.html';
+    if (options.ui === 'legacy') {
+      options.html5Path = 'ui-legacy/ReaderControl.html';
+      options.html5MobilePath = 'ui-legacy/MobileReaderControl.html';
       if (options.mobileRedirect === undefined) {
-        options.mobileRedirect = false;
+        options.mobileRedirect = true;
       }
     }
-    this.options = $.extend(true, {}, PDFTron.WebViewer.Options, options);
+    this.options = Utils.extend({}, PDFTron.WebViewer.Options, options);
     // set up alternate viewer paths.
     if (typeof options.path !== 'undefined') {
       // alternate path provided
@@ -75,7 +99,7 @@
     }
 
     this.element = element;
-    $(this.element).css('overflow', 'hidden');
+    this.element.style.overflow = 'hidden';
 
     window.WebViewer = {
       l: function() {
@@ -102,26 +126,13 @@
 
 
   PDFTron.WebViewer.prototype = {
-    version: '3.3.0',
+    version: '4.0.0',
     create: function() {
-      var me = this;
       if (typeof this.options.initialDoc !== 'undefined') {
         var docPath = this._correctRelativePath(this.options.initialDoc);
         docPath = encodeURIComponent(docPath); // url-encode the doc path
         this.options.initialDoc = docPath;
         this._create();
-      } else if (typeof this.options.cloudApiId !== 'undefined') {
-        $.get('https://api.pdftron.com/v2/download/' + this.options.cloudApiId + '?type=xod&redirect=false', function(data) {
-          if (typeof data.url === 'undefined') {
-            me.loadErrorPage();
-          } else {
-            me.options.initialDoc = encodeURIComponent(data.url);
-            me._create();
-          }
-        }, 'json')
-          .error(function() {
-            me.loadErrorPage();
-          });
       } else {
         // just create the viewer if there is no initial doc specified
         this._create();
@@ -132,13 +143,9 @@
       var me = this;
       me.rcId = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1); // random id
       if ((typeof this._trigger) === 'undefined') {
-        this._trigger = function(type, event, data) {
-          event = $.Event(event);
-          event.type = type;
-          // the original event may come from any element
-          // so we need to reset the target on the new event
-          event.target = $(this.element)[0];
-          $(this.element).trigger(event, data);
+        this._trigger = function(type, data) {
+          var event = Utils.createEvent(type, data);
+          this.element.dispatchEvent(event);
         };
       }
 
@@ -151,11 +158,15 @@
       me._createViewer(viewers);
     },
     _notSupportedMobile: function() {
-      $(this.element).append('<div id="webviewer-browser-unsupported">PDF document viewing is not supported by this browser.</div>');
+      var notSupportedDiv = document.createElement('div');
+      notSupportedDiv.id = 'webviewer-browser-unsupported';
+      notSupportedDiv.textContent = 'PDF document viewing is not supported by this browser.';
+
+      this.element.appendChild(notSupportedDiv);
     },
     _createViewer: function(viewers) {
       var me = this;
-      me.selectedType = 'none';
+      me.selectedType = null;
       var newLocation;
 
       if (this.isMobileDevice()) {
@@ -227,7 +238,10 @@
         }
 
         if (supportError) {
-          $(me.element).append('<div id="webviewer-browser-unsupported">' + supportError + '</div>');
+          var unsupportedDiv = document.createElement('div');
+          unsupportedDiv.id = 'webviewer-browser-unsupported';
+          unsupportedDiv.textContent = supportError;
+          me.element.appendChild(unsupportedDiv);
         }
       }
     },
@@ -264,8 +278,8 @@
         }
 
         if (me.instance.docViewer.getDocument() === null) {
-          // note, we need bind using the iframe window's instance of jQuery
-          viewerWindow.$(iframe.contentDocument).bind('documentLoaded', function(event) {
+          // note, we need to listen using the iframe window's instance of jQuery
+          viewerWindow.$(iframe.contentDocument).on('documentLoaded', function(event) {
             me._trigger(event.type);
           });
         } else {
@@ -274,11 +288,11 @@
         }
 
         // bind the rest of the events/callbacks here
-        viewerWindow.$(iframe.contentDocument).bind('displayModeChanged layoutModeChanged zoomChanged pageChanged fitModeChanged toolModeChanged printProgressChanged error',
+        viewerWindow.$(iframe.contentDocument).on('displayModeChanged layoutModeChanged zoomChanged pageChanged fitModeChanged toolModeChanged printProgressChanged error',
           function() {
             var event = arguments[0];
             // relay event
-            me._trigger(event.type, null, Array.prototype.slice.call(arguments, 1));
+            me._trigger(event.type, Array.prototype.slice.call(arguments, 1));
           });
       } catch (error) {
         console.warn('Viewer is on a different domain, API functions may not work because of cross domain permissions.');
@@ -315,11 +329,11 @@
     _getHTML5OptionsURL: function() {
       if (this.selectedType === 'html5') {
         if (this.options.html5Options) {
-          $.extend(this.options, this.options.html5Options);
+          Utils.extend(this.options, this.options.html5Options);
         }
       } else if (this.selectedType === 'html5Mobile') {
         if (this.options.html5MobileOptions) {
-          $.extend(this.options, this.options.html5MobileOptions);
+          Utils.extend(this.options, this.options.html5MobileOptions);
         }
       }
 
@@ -382,7 +396,7 @@
       if (options.enableAnnotations) {
         url += '&a=1';
       }
-      if (options.disabledElements && options.ui === 'beta') {
+      if (options.disabledElements && options.ui !== 'legacy') {
         var disabledElements = encodeURIComponent(options.disabledElements.join(','));
         url += '&disabledElements=' + disabledElements;
       }
@@ -390,6 +404,9 @@
         var serverUrl = this._correctRelativePath(options.serverUrl);
         serverUrl = encodeURIComponent(serverUrl);
         url += '&server_url=' + serverUrl;
+      }
+      if (options.serverUrlHeaders) {
+        url += '&serverUrlHeaders=' + JSON.stringify(options.serverUrlHeaders);
       }
       if (options.documentId) {
         url += '&did=' + options.documentId;
@@ -403,6 +420,9 @@
         var config = this._correctRelativePath(options.config);
         config = encodeURIComponent(config);
         url += '&config=' + config;
+      }
+      if (options.disableI18n && options.ui !== 'legacy') {
+        url += '&disableI18n=1';
       }
       if (options.enableOfflineMode) {
         url += '&offline=1';
@@ -482,33 +502,32 @@
       var iframeSource = this.options.html5Path + this._getHTML5OptionsURL();
 
       // _getHTML5OptionsURL
-      var $rcFrame = $(document.createElement('iframe'));
-      $rcFrame.attr({
-        id: this.rcId,
-        src: iframeSource,
-        frameborder: 0,
-        width: '100%',
-        height: '100%',
-        allowFullScreen: true,
-        webkitallowfullscreen: true,
-        mozallowfullscreen: true
-      });
+      var rcFrame = document.createElement('iframe');
+      rcFrame.id = this.rcId;
+      rcFrame.src = iframeSource;
+      rcFrame.frameBorder = 0;
+      rcFrame.width = '100%';
+      rcFrame.height = '100%';
+      rcFrame.setAttribute('allowfullscreen', true);
+      rcFrame.setAttribute('webkitallowfullscreen', true);
+      rcFrame.setAttribute('mozallowfullscreen', true);
+
       if (this.options.backgroundColor) {
-        $rcFrame.attr('data-bgcolor', this.options.backgroundColor);
+        rcFrame.setAttribute('data-bgcolor', this.options.backgroundColor);
       }
 
       if (this.options.assetPath) {
-        $rcFrame.attr('data-assetpath', encodeURIComponent(this.options.assetPath));
+        rcFrame.setAttribute('data-assetpath', encodeURIComponent(this.options.assetPath));
       }
 
-      $rcFrame.on('load', function() {
+      rcFrame.addEventListener('load', function() {
         try {
           me.instance = this.contentWindow.readerControl;
 
           var iframe = this;
 
           if (typeof me.instance === 'undefined') {
-            this.contentWindow.$(this.contentDocument).bind('viewerLoaded', function() {
+            this.contentWindow.$(this.contentDocument).on('viewerLoaded', function() {
               me.instance = iframe.contentWindow.readerControl;
               me._viewerLoaded(iframe);
             });
@@ -520,25 +539,24 @@
         }
       });
 
-      $(this.element).append($rcFrame);
-      return $rcFrame;
+      this.element.appendChild(rcFrame);
     },
     _createHTML5Mobile: function() {
       // use the correct type if mobile
       var me = this;
       var iframeSource = this.options.html5MobilePath + this._getHTML5OptionsURL();
 
-      var $rcFrame = $(document.createElement('iframe'));
-      $rcFrame.attr({
-        id: this.rcId,
-        src: iframeSource,
-        frameborder: 0
-      });
+      var rcFrame = document.createElement('iframe');
+      rcFrame.id = this.rcId;
+      rcFrame.src = iframeSource;
+      rcFrame.frameborder = 0;
+
       if (this.options.assetPath) {
-        $rcFrame.attr('data-assetpath', encodeURIComponent(this.options.assetPath));
+        rcFrame.setAttribute('data-assetpath', encodeURIComponent(this.options.assetPath));
       }
-      $rcFrame.css('width', '100%').css('height', '100%');
-      $rcFrame.on('load', function() {
+      rcFrame.style.width = '100%';
+      rcFrame.style.height = '100%';
+      rcFrame.addEventListener('load', function() {
         try {
           me.instance = this.contentWindow.readerControl;
 
@@ -556,11 +574,7 @@
           me._viewerLoaded(iframe);
         }
       });
-      $(this.element).append($rcFrame);
-      // $(this.element).load(iframeSource);
-      return $rcFrame;
-    },
-    _init: function() {
+      this.element.appendChild(rcFrame);
     },
     /**
      * Gets the instance of the ReaderControl object loaded by WebViewer.
@@ -569,13 +583,6 @@
      */
     getInstance: function() {
       return this.instance;
-    },
-    loadErrorPage: function() {
-      if (typeof this.options.errorPage === 'undefined') {
-        $(this.element).append("<h2 style='text-align:center;margin-top:100px'>We're sorry, an error has occurred.</h2>");
-      } else {
-        $(this.element).load(this.options.errorPage);
-      }
     },
     /**
      * Gets the visibility of the default side window. Not supported for mobile viewer.
@@ -869,7 +876,7 @@
       var existingLoadOptions = {
         streaming: this.options.streaming
       };
-      var loadOptions = $.extend(true, {}, existingLoadOptions, options);
+      var loadOptions = Utils.extend({}, existingLoadOptions, options);
       if (typeof loadOptions.documentId !== 'undefined') {
         // allow "null" values
         this.getInstance().docId = loadOptions.documentId;
@@ -991,29 +998,6 @@
     getViewerType: function() {
       return this.selectedType;
     },
-    // JQuery UI Widget option method
-    option: function(key, value) {
-      // optional: get/change options post initialization
-      // ignore if you don't require them.
-
-      // signature: $('#viewer').webViewer({ type: 'html5' });
-      if ($.isPlainObject(key)) {
-        this.options = $.extend(true, this.options, key);
-
-        // signature: $('#viewer').option('type'); - getter
-      } else if (key && typeof value === 'undefined') {
-        return this.options[key];
-
-        // signature: $('#viewer').webViewer('option', 'type', 'html5');
-      } else {
-        this.options[key] = value;
-      }
-
-      // required: option must return the current instance.
-      // When re-initializing an instance on elements, option
-      // is called first and is then chained to the _init method.
-      return this;
-    },
     // make relative paths absolute
     _correctRelativePath: function(path) {
       // get current url
@@ -1115,94 +1099,77 @@
      * @param {function} func The function to run. The function will be passed the iframe window, readerControl (aka WebViewer instance) and jQuery of the iframe window as parameters.
      */
     runInIframe: function(func) {
-      var $element = $(this.element);
-
-      var iframeWindow = $element[0].querySelector('iframe').contentWindow;
+      var iframeWindow = this.element.querySelector('iframe').contentWindow;
       var me = this;
 
       var callFunc = function() {
+        me.element.removeEventListener('ready', callFunc);
         func(iframeWindow, me.getInstance(), iframeWindow.$);
       };
 
       if (this.getInstance()) {
         setTimeout(callFunc, 0);
       } else {
-        $element.one('ready', callFunc);
+        this.element.addEventListener('ready', callFunc);
       }
     }
   };
 
   /**
-   * A jQuery event bound on the element, triggered when the viewer is ready, before a document is loaded.
+   * An event bound on the element, triggered when the viewer is ready, before a document is loaded.
    * @event
    * @name PDFTron.WebViewer#ready
    * @example
-   * $('#viewer').bind('ready', function(event, data) {
+   * viewerElement.addEventListener('ready', function(event, data) {
    *     //event triggered
    * });
    */
   /**
-   * A jQuery event bound on the element, triggered when a document has been loaded in the viewer.
+   * An event bound on the element, triggered when a document has been loaded in the viewer.
    * @event
    * @name PDFTron.WebViewer#documentLoaded
    * @example
-   * $('#viewer').bind('documentLoaded', function(event, data) {
+   * viewerElement.addEventListener('documentLoaded', function(event, data) {
    *     //event triggered
    * });
    */
   /**
-   * A jQuery event bound on the element, triggered when the page number has changed.
+   * An event bound on the element, triggered when the page number has changed.
    * @event
    * @name PDFTron.WebViewer#pageChanged
    * @example
-   * $('#viewer').bind('pageChanged', function(event, data) {
+   * viewerElement.addEventListener('pageChanged', function(event, data) {
    *     //event triggered
    * });
    */
   /**
-   * A jQuery event bound on the element, triggered when the zoom level has changed.
+   * An event bound on the element, triggered when the zoom level has changed.
    * @event
    * @name PDFTron.WebViewer#zoomChanged
    * @example
-   * $('#viewer').bind('zoomChanged', function(event, data) {
+   * viewerElement.addEventListener('zoomChanged', function(event, data) {
    *     //event triggered
    * });
    */
   /**
-   * A jQuery event bound on the element, triggered when the display mode has changed.
-   * @event
-   * @name PDFTron.WebViewer#displayModeChanged
-   * @deprecated Since version 1.7. Use [layoutModeChanged]{@link PDFTron.WebViewer#event:layoutModeChanged} instead.
-   * @example
-   * $('#viewer').bind('displayModeChanged', function(event, data) {
-   *     //event triggered
-   * });
-   */
-  /**
-   * A jQuery event bound on the element, triggered when the layout mode has changed.
+   * An event bound on the element, triggered when the layout mode has changed.
    * @event
    * @name PDFTron.WebViewer#layoutModeChanged
    * @since Version 1.7
    * @example
-   * $('#viewer').bind('layoutModeChanged', function(event, data) {
+   * viewerElement.addEventListener('layoutModeChanged', function(event, data) {
    *     //event triggered
    * });
    */
   /**
-   * A jQuery event bound on the element, triggered when the tool mode has changed.
+   * An event bound on the element, triggered when the tool mode has changed.
    * @event
    * @name PDFTron.WebViewer#toolModeChanged
    * @example
-   * $('#viewer').bind('toolModeChanged', function(event, data) {
+   * viewerElement.addEventListener('toolModeChanged', function(event, data) {
    *     //event triggered
    * });
    */
-
-  // if JQuery UI framework is present, create widget for WebViewer
-  if (typeof $.widget === 'function') {
-    $.widget('PDFTron.webViewer', PDFTron.WebViewer.prototype);
-  }
-
 
   /**
    * Contains string enums for all layouts for WebViewer. They are used to dictate how pages are placed within the viewer. Used by [setLayoutMode]{@link PDFTron.WebViewer#setLayoutMode} and [getLayoutMode]{@link PDFTron.WebViewer#getLayoutMode}.
@@ -1276,7 +1243,6 @@
    * @property {boolean} [autoCreate=true] A boolean to control whether the viewer should be created after instantiating a new PDFTron.WebViewer. When set to false, invoke the create() method explicity.
    * @property {boolean} [azureWorkaround=false] Whether or not to workaround the issue of Azure not accepting range requests of a certain type. Enabling the workaround will add an extra HTTP request of overhead but will still allow documents to be loaded from other locations.
    * @property {string} [backgroundColor] A string to set the background color of the inner page to (desktop only).
-   * @property {string} [cloudApiId] The share ID or session ID created from <a href="http://www.pdftron.com/pws/cloud" target="_blank">PWS Cloud</a>. Note: the browser must have CORS support (ignored when initialDoc is also set).
    * @property {string} [css] A URL path to a custom CSS file that holds style customizations.
    * @property {string} [config] A URL path to a JavaScript configuration file that holds UI customizations.
    * @property {string} [custom] A string of custom data that can be retrieved by the ReaderControl. In a config file you can access using window.ControlUtils.getCustomData().
@@ -1287,7 +1253,6 @@
    * @property {boolean} [enableOfflineMode=false] A boolean to enable offline mode. By default this will add buttons to the UI to allow for saving the document to an offline database. (XOD only)
    * @property {boolean} [enableReadOnlyMode=false] A boolean to enable annotations read-only mode.
    * @property {object} [encryption] An object containing encryption properties. Expects the object to have type: "aes" and p: "your_document_password" (XOD only).
-   * @property {string} [errorPage] A path to an HTML page to display errors.
    * @property {string} [externalPath] The path to a xod document folder generated using the external parts option.
    * @property {boolean} [hideAnnotationPanel=false] Whether to hide the annotation panel or not.
    * @property {Options} [html5MobileOptions] An Options object that overrides the existing options when the Mobile viewer is loaded.
@@ -1300,7 +1265,8 @@
    * @property {string} [pdfBackend] A string to control PDF engine \["auto", "ems", "pnacl"\] (PDF only, default "auto" chooses the best option availible)
    * @property {boolean} [fullAPI=false] A boolean to enable the use of PDFNet.js library functions (PDF only).
    * @property {boolean} [preloadPDFWorker=true] A boolean to enable the preloading of the PDF worker files (PDF only).
-   * @property {string} [serverUrl] A URL to the server-side script that handles annotations. (required for full annotation support).
+   * @property {string} [serverUrl] A URL to the server-side script that handles annotations.
+   * @property {object} [serverUrlHeaders] A object containing the custom headers that will set when calling the serverUrl.
    * @property {boolean} [showLocalFilePicker=false] A boolean to show/hide the local file picker (PDF only).
    * @property {boolean} [showPageHistoryButtons=true] A boolean to show/hide the page history buttons.
    * @property {boolean} [showToolbarControl] A boolean to show/hide the default toolbar control.
@@ -1313,7 +1279,7 @@
    * @property {boolean} [useDownloader=true] Enable or disable using Downloader on urls (PDF only).
    * @property {boolean} [workerTransportPromise] An object with keys 'pdf' and/or 'office' that are promises that will resolve to a PDF or Office worker, used if you already create a worker on the outer page and want to share it with the viewer (PDF only).
    * @property {string} [xdomainProxyUrl] A URL to the proxy HTML file on the remote server when using the xdomain CORS workaround. Can also be an object to specify multiple URLs.
-  * @property {string} [ui] Enables webviewer ui beta if set to 'beta'.
+  * @property {string} [ui] Enables old viewer if set to 'legacy'.
    */
   PDFTron.WebViewer.Options = {
     initialDoc: undefined,
@@ -1323,32 +1289,32 @@
     autoCreate: true,
     azureWorkaround: false,
     backgroundColor: undefined,
-    cloudApiId: undefined,
     css: undefined,
     config: undefined,
     custom: undefined,
     documentId: undefined,
     documentType: undefined,
     enableAnnotations: true,
+    disableI18n: false,
     disabledElements: undefined,
     enableOfflineMode: false,
     enableReadOnlyMode: false,
     encryption: undefined,
-    errorPage: undefined,
     externalPath: undefined,
     hideAnnotationPanel: false,
     html5MobileOptions: {},
-    html5MobilePath: 'html5/MobileReaderControl.html',
+    html5MobilePath: './ui/build/index.html',
     html5Options: {},
-    html5Path: 'html5/ReaderControl.html',
+    html5Path: './ui/build/index.html',
     l: undefined,
-    mobileRedirect: true,
+    mobileRedirect: false,
     path: '',
     pdfBackend: undefined,
     pdftronServer: undefined,
     fullAPI: false,
     preloadPDFWorker: true,
     serverUrl: undefined,
+    serverUrlHeaders: undefined,
     showLocalFilePicker: false,
     showPageHistoryButtons: true,
     showToolbarControl: undefined,
